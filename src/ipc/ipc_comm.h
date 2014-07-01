@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+class IPCCoD4Event;
+
 class IPCComm {
 public:
 	IPCComm(unsigned int commId, std::string path, std::string prefix);
@@ -50,7 +52,7 @@ private:
 	
 	int clientSocket;
 	
-	std::vector<char*> sendQueue;
+	std::vector<IPCCoD4Event*> sendQueue;
 };
 
 #endif	/* IPC_COMM_H */

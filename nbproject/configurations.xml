@@ -28,8 +28,8 @@
           <itemPath>/home/zinglish/Projects/project-alice/alice/src/ipc/ipc_comm.h</itemPath>
           <itemPath>/home/zinglish/Projects/project-alice/alice/src/ipc/ipc_event.cpp</itemPath>
           <itemPath>/home/zinglish/Projects/project-alice/alice/src/ipc/ipc_event.h</itemPath>
-          <itemPath>/home/zinglish/Projects/project-alice/alice/src/ipc/ipc_rx_pkt.cpp</itemPath>
-          <itemPath>/home/zinglish/Projects/project-alice/alice/src/ipc/ipc_rx_pkt.h</itemPath>
+          <itemPath>/home/zinglish/Projects/project-alice/alice/src/ipc/ipc_rx_func_pkt.cpp</itemPath>
+          <itemPath>/home/zinglish/Projects/project-alice/alice/src/ipc/ipc_rx_func_pkt.h</itemPath>
           <itemPath>/home/zinglish/Projects/project-alice/alice/src/ipc/ipc_server_man.cpp</itemPath>
           <itemPath>/home/zinglish/Projects/project-alice/alice/src/ipc/ipc_server_man.h</itemPath>
         </logicalFolder>
@@ -138,12 +138,12 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="/home/zinglish/Projects/project-alice/alice/src/ipc/ipc_rx_pkt.cpp"
+      <item path="/home/zinglish/Projects/project-alice/alice/src/ipc/ipc_rx_func_pkt.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="/home/zinglish/Projects/project-alice/alice/src/ipc/ipc_rx_pkt.h"
+      <item path="/home/zinglish/Projects/project-alice/alice/src/ipc/ipc_rx_func_pkt.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -259,12 +259,12 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="/home/zinglish/Projects/project-alice/alice/src/ipc/ipc_rx_pkt.cpp"
+      <item path="/home/zinglish/Projects/project-alice/alice/src/ipc/ipc_rx_func_pkt.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="/home/zinglish/Projects/project-alice/alice/src/ipc/ipc_rx_pkt.h"
+      <item path="/home/zinglish/Projects/project-alice/alice/src/ipc/ipc_rx_func_pkt.h"
             ex="false"
             tool="3"
             flavor2="0">

@@ -1,5 +1,7 @@
 #include "ipc_comm.h"
 
+#include "ipc_event.h"
+
 #include <string>
 #include <sys/un.h>
 #include <sys/socket.h>
@@ -87,12 +89,22 @@ void* IPCComm::ThreadedListener(void* ipcCommPtr) {
 	IPCComm* self = (IPCComm*) ipcCommPtr;
 }
 
+/**
+ * Threaded sender, when signalled it will send the packets ontop of the queue
+ * @param ipcCommPtr
+ * @return 
+ */
 void* IPCComm::ThreadedSender(void* ipcCommPtr) {
 	IPCComm* self = (IPCComm*) ipcCommPtr;
 	
 	while(true) {
+		// The thread will only continue once the signal has been triggered
 		pthread_cond_wait(&self->sendSig, &self->sendLock);
-		printf("Signalled\n");
+		
+		// Compile and send each IPC Event
+		for(unsigned int i=0; i<self->sendQueue.size(); i++) {
+			char* txPkt = self->sendQueue.at(i).Compile();
+		}
 	}
 }
 

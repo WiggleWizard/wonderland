@@ -41,7 +41,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/1973015878/hook.o \
 	${OBJECTDIR}/_ext/1183286110/ipc_comm.o \
 	${OBJECTDIR}/_ext/1183286110/ipc_event.o \
-	${OBJECTDIR}/_ext/1183286110/ipc_rx_pkt.o \
+	${OBJECTDIR}/_ext/1183286110/ipc_rx_func_pkt.o \
 	${OBJECTDIR}/_ext/1183286110/ipc_server_man.o \
 	${OBJECTDIR}/_ext/1211768401/logger.o \
 	${OBJECTDIR}/_ext/1211768401/main.o
@@ -101,10 +101,10 @@ ${OBJECTDIR}/_ext/1183286110/ipc_event.o: /home/zinglish/Projects/project-alice/
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -std=c++11 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1183286110/ipc_event.o /home/zinglish/Projects/project-alice/alice/src/ipc/ipc_event.cpp
 
-${OBJECTDIR}/_ext/1183286110/ipc_rx_pkt.o: /home/zinglish/Projects/project-alice/alice/src/ipc/ipc_rx_pkt.cpp 
+${OBJECTDIR}/_ext/1183286110/ipc_rx_func_pkt.o: /home/zinglish/Projects/project-alice/alice/src/ipc/ipc_rx_func_pkt.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/1183286110
 	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++11 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1183286110/ipc_rx_pkt.o /home/zinglish/Projects/project-alice/alice/src/ipc/ipc_rx_pkt.cpp
+	$(COMPILE.cc) -g -std=c++11 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/1183286110/ipc_rx_func_pkt.o /home/zinglish/Projects/project-alice/alice/src/ipc/ipc_rx_func_pkt.cpp
 
 ${OBJECTDIR}/_ext/1183286110/ipc_server_man.o: /home/zinglish/Projects/project-alice/alice/src/ipc/ipc_server_man.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/1183286110
