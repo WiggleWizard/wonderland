@@ -5,7 +5,8 @@
 extern bool debugMode = true;
 
 extern struct types {
-	unsigned int uint = 1;
+	unsigned int uint = 1; // Unsigned int
+	unsigned int ch   = 2; // Characters
 } types;
 
 #endif	/* GLOBALS_H */
