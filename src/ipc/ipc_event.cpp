@@ -5,7 +5,7 @@
 
 #include "../cod4/events.h"
 
-IPCCoD4Event::IPCCoD4Event(unsigned int eventId, char* a1) {
+IPCCoD4Event::IPCCoD4Event(unsigned int eventId, unsigned int a1type, char* a1) {
 	this->eventId = eventId;
 	
 	this->a1 = a1;

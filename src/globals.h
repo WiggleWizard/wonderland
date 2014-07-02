@@ -4,5 +4,9 @@
 // Enables or disables debug mode.
 extern bool debugMode = true;
 
+extern struct types {
+	unsigned int uint = 1;
+} types;
+
 #endif	/* GLOBALS_H */
 

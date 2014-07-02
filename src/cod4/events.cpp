@@ -1,14 +1,13 @@
 #include "events.h"
 
 #include "hook.h"
+#include "../globals.h"
 #include "../ipc/ipc_event.h"
 #include "../ipc/ipc_server_man.h"
 
 Hook* Events::hPlayerSay;
 
-Events::Events() {
-}
-
+Events::Events() {}
 Events::Events(const Events& orig) {}
 Events::~Events() {}
 
@@ -35,7 +34,8 @@ unsigned int Events::GetEventId(unsigned long loc) {
 * @return 
 */
 int Events::HPlayerSay(unsigned long playerPointer, int a2, int teamSay, char* message) {
-	IPCServer::BroadcastEvent(new IPCCoD4Event(message));
+	IPCServer::BroadcastEvent(new IPCCoD4Event(GetEventId(this), types.uint, message));
+	
 	printf("%X | %s\n", playerPointer, message);
 
 	return 0;
