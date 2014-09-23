@@ -35,6 +35,14 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/src/cod4/callables.o \
+	${OBJECTDIR}/src/cod4/controller.o \
+	${OBJECTDIR}/src/cod4/events.o \
+	${OBJECTDIR}/src/cod4/hook.o \
+	${OBJECTDIR}/src/ipc/ipc_comm.o \
+	${OBJECTDIR}/src/ipc/ipc_event.o \
+	${OBJECTDIR}/src/ipc/ipc_rx_func_pkt.o \
+	${OBJECTDIR}/src/ipc/ipc_server_man.o \
 	${OBJECTDIR}/src/logger.o \
 	${OBJECTDIR}/src/main.o
 
@@ -62,6 +70,46 @@ LDLIBSOPTIONS=
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libwonderland.${CND_DLIB_EXT}: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libwonderland.${CND_DLIB_EXT} ${OBJECTFILES} ${LDLIBSOPTIONS} -ldl -m32 -fPIC -shared -fPIC
+
+${OBJECTDIR}/src/cod4/callables.o: src/cod4/callables.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/cod4
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++11 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/cod4/callables.o src/cod4/callables.cpp
+
+${OBJECTDIR}/src/cod4/controller.o: src/cod4/controller.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/cod4
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++11 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/cod4/controller.o src/cod4/controller.cpp
+
+${OBJECTDIR}/src/cod4/events.o: src/cod4/events.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/cod4
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++11 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/cod4/events.o src/cod4/events.cpp
+
+${OBJECTDIR}/src/cod4/hook.o: src/cod4/hook.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/cod4
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++11 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/cod4/hook.o src/cod4/hook.cpp
+
+${OBJECTDIR}/src/ipc/ipc_comm.o: src/ipc/ipc_comm.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/ipc
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++11 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ipc/ipc_comm.o src/ipc/ipc_comm.cpp
+
+${OBJECTDIR}/src/ipc/ipc_event.o: src/ipc/ipc_event.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/ipc
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++11 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ipc/ipc_event.o src/ipc/ipc_event.cpp
+
+${OBJECTDIR}/src/ipc/ipc_rx_func_pkt.o: src/ipc/ipc_rx_func_pkt.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/ipc
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++11 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ipc/ipc_rx_func_pkt.o src/ipc/ipc_rx_func_pkt.cpp
+
+${OBJECTDIR}/src/ipc/ipc_server_man.o: src/ipc/ipc_server_man.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/ipc
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++11 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ipc/ipc_server_man.o src/ipc/ipc_server_man.cpp
 
 ${OBJECTDIR}/src/logger.o: src/logger.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src

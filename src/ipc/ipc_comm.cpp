@@ -102,9 +102,9 @@ void* IPCComm::ThreadedSender(void* ipcCommPtr) {
 		pthread_cond_wait(&self->sendSig, &self->sendLock);
 		
 		// Compile and send each IPC Event
-		for(unsigned int i=0; i<self->sendQueue.size(); i++) {
-			char* txPkt = self->sendQueue.at(i).Compile();
-		}
+//		for(unsigned int i=0; i<self->sendQueue.size(); i++) {
+//			char* txPkt = self->sendQueue.at(i).Compile();
+//		}
 	}
 }
 

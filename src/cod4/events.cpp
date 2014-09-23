@@ -34,7 +34,7 @@ unsigned int Events::GetEventId(unsigned long loc) {
 * @return 
 */
 int Events::HPlayerSay(unsigned long playerPointer, int a2, int teamSay, char* message) {
-	IPCServer::BroadcastEvent(new IPCCoD4Event(GetEventId(this), types.ch, message));
+	//IPCServer::BroadcastEvent(new IPCCoD4Event(GetEventId(this), types.ch, message));
 	
 	printf("%X | %s\n", playerPointer, message);
 
