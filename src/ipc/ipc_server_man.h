@@ -57,6 +57,12 @@ public:
      * @return Payload
      */
 	char* RecvPayload(int socket, u_int32_t payloadSize);
+
+	/**
+	 * Flushes the socket to get rid of excess data in the packet to
+	 * stop recv() hanging.
+	 */
+	void FlushSocket(int socket);
 	
 	/**
 	 * Assigns/Creates a new communication path.

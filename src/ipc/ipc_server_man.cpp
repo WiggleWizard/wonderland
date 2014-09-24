@@ -45,7 +45,7 @@ void* IPCServer::ThreadedCommAllocator(void* serverPtr) {
 	
 	// Prepare and bind the socket
 	local.sun_family = AF_UNIX;
-	strcpy(local.sun_path, "/home/zinglish/unixtestsocket");
+	strcpy(local.sun_path, "/tmp/wonderland");
 	unlink(local.sun_path); // Delete the original socket
 	unsigned int len = strlen(local.sun_path) + sizeof(local.sun_family);
 	
@@ -79,7 +79,7 @@ void* IPCServer::ThreadedCommAllocator(void* serverPtr) {
 		printf("Connection established\n");
 		
 		// Once connected we need to get data from the client
-		char rxRaw[4]; // 8bytes (1st int is version, 2nd int is size of payload)
+		char rxRaw[8]; // 8bytes (1st int is version, 2nd int is size of payload)
 		std::string rxString = ""; // Used for debugging
 		unsigned int rxSize = sizeof(rxRaw);
 		int rxStatus = 0;
@@ -87,56 +87,32 @@ void* IPCServer::ThreadedCommAllocator(void* serverPtr) {
 		char* payload = NULL;
 		
 		while(true) {
-			rxStatus = recv(clientSock, &rxRaw, 4, 0);
+			rxStatus = recv(clientSock, &rxRaw, 8, 0);
 			
 			// An error occurred -OR- EOS
 			if(rxStatus <= 0)
 				break;
 			
-			//payload = server->RecvPayload(clientSock, (u_int32_t) rxRaw[4]);
-			
 			// Collate the data for debugging
 			//rxString.append(rxRaw, (u_int32_t) rxRaw[3]);
+
+			// Get the version and payload length
+			u_int32_t version    = ntohl(*(u_int32_t*) &rxRaw[0]);
+			u_int32_t payloadLen = ntohl(*(u_int32_t*) &rxRaw[4]);
+
+			// Get the full payload
+			payload = server->RecvPayload(clientSock, payloadLen);
 			
-			printf("Payload: ");
-			for(int i = 0; i<4; i++)
-			{
-				printf("%02x:", rxRaw[i]);
-			}
-			printf("\n");
-			
-			printf("Version: %i\n", (u_int32_t) rxRaw);
-			
-			// Indicates end of transmission
-			if(rxRaw[rxSize - 1] == 0x00)
-			{
-				char* tx = server->ParseManagerRXPacket(&rxRaw[0]);
-				send(clientSock, tx, strlen(tx), 0);
-				
-				free(tx);
-			}
+			// General debugging
+			printf("Version: %i\n", version);
+			printf("Payload length: %i\n", payloadLen);
+			printf("Payload: %s\n", payload);
 		}
 		
-		printf("Full transmission: %s\n", rxString.c_str());
+		delete payload;
+
 		printf("Client disconnected\n");
 	}
-}
-
-char* IPCServer::RecvPayload(int socket, u_int32_t payloadSize)
-{
-	char* payload = new char[payloadSize];
-	
-	unsigned int curPos     = 0;
-	unsigned int bufferSize = 64; // Recv 64bytes every read
-	
-	while(curPos < payloadSize)
-	{
-		recv(socket, &payload[curPos], bufferSize, 0);
-		
-		curPos += bufferSize;
-	}
-	
-	return payload;
 }
 
 
@@ -144,6 +120,32 @@ char* IPCServer::RecvPayload(int socket, u_int32_t payloadSize)
 /*===============================================================*\
  * FUNCTIONS
 \*===============================================================*/
+
+char* IPCServer::RecvPayload(int socket, u_int32_t payloadSize)
+{
+	// Make space for the payload, setting the last byte to 0x00 as if
+	// it was a C style string
+	char* payload = new char[payloadSize + 1];
+	memset(&payload[payloadSize], 0x00, 1);
+	
+	unsigned int curPos     = 0;
+	unsigned int currLen    = 0; // Amount of chars written to payload
+	unsigned int bufferSize = 3; // Recv 64bytes every read
+	
+	while(curPos < payloadSize)
+	{
+		currLen = payloadSize - curPos;
+
+		if(currLen < bufferSize)
+			bufferSize = currLen;
+
+		recv(socket, &payload[curPos], bufferSize, 0);
+		
+		curPos += bufferSize;
+	}
+	
+	return payload;
+}
 
 char* IPCServer::ParseManagerRXPacket(char* pkt) {
 	char* rtn = NULL;
