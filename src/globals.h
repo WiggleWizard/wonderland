@@ -9,8 +9,8 @@ extern struct types {
 	unsigned int ch   = 2; // Characters
 } types;
 
-extern int IPC_VER;
-extern char* BANNER;
+extern unsigned int IPC_VER;
+extern char BANNER[1024];
 
 #endif	/* GLOBALS_H */
 

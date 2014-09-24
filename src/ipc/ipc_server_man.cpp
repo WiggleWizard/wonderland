@@ -13,7 +13,7 @@ IPCServer::IPCServer(std::string path) {
 	// Initialize the client holder
 	this->clientComms.reserve(5);
 	
-	this->clientCommPrefix = "comm-";
+	this->clientCommPrefix = "rabbithole-";
 	this->clientCommPath   = "/tmp/";
 	
 	// Create the management thread
@@ -81,7 +81,6 @@ void* IPCServer::ThreadedCommAllocator(void* serverPtr) {
 		// Once connected we need to get data from the client
 		char rxRaw[8]; // 8bytes (1st int is version, 2nd int is size of payload)
 		std::string rxString = ""; // Used for debugging
-		unsigned int rxSize = sizeof(rxRaw);
 		int rxStatus = 0;
 		
 		char* payload = NULL;
@@ -92,13 +91,17 @@ void* IPCServer::ThreadedCommAllocator(void* serverPtr) {
 			// An error occurred -OR- EOS
 			if(rxStatus <= 0)
 				break;
-			
-			// Collate the data for debugging
-			//rxString.append(rxRaw, (u_int32_t) rxRaw[3]);
 
 			// Get the version and payload length
 			u_int32_t version    = ntohl(*(u_int32_t*) &rxRaw[0]);
 			u_int32_t payloadLen = ntohl(*(u_int32_t*) &rxRaw[4]);
+
+			// Double check protocol version
+			if(version != (u_int32_t) IPC_VER)
+			{
+				printf("IPC protocol version mismatch (RX: %i | IPC_VER: %i)\n", version, IPC_VER);
+				break;
+			}
 
 			// Get the full payload
 			payload = server->RecvPayload(clientSock, payloadLen);
@@ -107,6 +110,9 @@ void* IPCServer::ThreadedCommAllocator(void* serverPtr) {
 			printf("Version: %i\n", version);
 			printf("Payload length: %i\n", payloadLen);
 			printf("Payload: %s\n", payload);
+
+			// Handle the response back to the client
+			ResponseHandler(clientSock, payload);
 		}
 		
 		delete payload;
@@ -130,14 +136,17 @@ char* IPCServer::RecvPayload(int socket, u_int32_t payloadSize)
 	
 	unsigned int curPos     = 0;
 	unsigned int currLen    = 0; // Amount of chars written to payload
-	unsigned int bufferSize = 3; // Recv 64bytes every read
+	unsigned int bufferSize = 8; // Recv 8 bytes every read
 	
 	while(curPos < payloadSize)
 	{
 		currLen = payloadSize - curPos;
 
+		// Set the recv size under certain circumstances
 		if(currLen < bufferSize)
 			bufferSize = currLen;
+		if(payloadSize < bufferSize)
+			bufferSize = payloadSize;
 
 		recv(socket, &payload[curPos], bufferSize, 0);
 		
@@ -147,14 +156,24 @@ char* IPCServer::RecvPayload(int socket, u_int32_t payloadSize)
 	return payload;
 }
 
-char* IPCServer::ParseManagerRXPacket(char* pkt) {
+char* IPCServer::ResponseHandler(int socket, char* packet) {
 	char* rtn = NULL;
+
+	// A request to go deeper into the rabbit hole
+	if(strncmp("RABBITHOLE", packet, 10) == 0)
+	{
+		// Prepare the full path to the rabbit hole
+		unsigned int commId = this->CreateNewComm();
+	}
+	else if(strncmp("VERSION", packet, 7) == 0)
+	{
+		
+	}
 	
 	// If it's a request to initiate a full communication socket
 	if(pkt[0] == 0x01 && pkt[1] == 0x00)
 	{
-		// Prepare the full path to the new comm
-		unsigned int commId = this->CreateNewComm();
+		
 		
 		std::string fullCommPath = clientComms.at(commId)->GetPath();
 		rtn = (char*) malloc(fullCommPath.length());

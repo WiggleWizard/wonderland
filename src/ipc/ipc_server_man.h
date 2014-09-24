@@ -65,19 +65,19 @@ public:
 	void FlushSocket(int socket);
 	
 	/**
-	 * Assigns/Creates a new communication path.
-	 * 
-     * @return Newly created communication path/name.
-     */
-	unsigned int CreateNewComm();
-	
-	/**
 	 * Parses receiving transmissions that occur in the manager.
 	 * 
      * @param pkt Packet from the manager.
      * @return Packet to send back to the client.
      */
-	char* ParseManagerRXPacket(char* pkt);
+	char* ResponseHandler(int socket, char* pkt);
+	
+	/**
+	 * Assigns/Creates a new communication path.
+	 * 
+     * @return Newly created communication path/name.
+     */
+	unsigned int CreateNewComm();
 	
 	/**
 	 * Adds an event broadcast on to the queue then signals all outbound
