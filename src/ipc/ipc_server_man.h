@@ -70,7 +70,7 @@ public:
      * @param pkt Packet from the manager.
      * @return Packet to send back to the client.
      */
-	char* ResponseHandler(int socket, char* pkt);
+	void ResponseHandler(int socket, char* pkt);
 	
 	/**
 	 * Assigns/Creates a new communication path.

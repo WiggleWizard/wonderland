@@ -112,7 +112,7 @@ void* IPCServer::ThreadedCommAllocator(void* serverPtr) {
 			printf("Payload: %s\n", payload);
 
 			// Handle the response back to the client
-			ResponseHandler(clientSock, payload);
+			server->ResponseHandler(clientSock, payload);
 		}
 		
 		delete payload;
@@ -156,31 +156,47 @@ char* IPCServer::RecvPayload(int socket, u_int32_t payloadSize)
 	return payload;
 }
 
-char* IPCServer::ResponseHandler(int socket, char* packet) {
-	char* rtn = NULL;
+void IPCServer::ResponseHandler(int socket, char* pkt) {
+	char* payload = NULL;
 
 	// A request to go deeper into the rabbit hole
-	if(strncmp("RABBITHOLE", packet, 10) == 0)
+	if(strncmp("RABBITHOLE", pkt, 10) == 0)
 	{
 		// Prepare the full path to the rabbit hole
 		unsigned int commId = this->CreateNewComm();
-	}
-	else if(strncmp("VERSION", packet, 7) == 0)
-	{
-		
-	}
-	
-	// If it's a request to initiate a full communication socket
-	if(pkt[0] == 0x01 && pkt[1] == 0x00)
-	{
-		
 		
 		std::string fullCommPath = clientComms.at(commId)->GetPath();
-		rtn = (char*) malloc(fullCommPath.length());
-		memcpy(rtn, fullCommPath.c_str(), fullCommPath.length());
+		payload = new char[fullCommPath.length() + 1];
+		
+		fullCommPath.copy(payload, fullCommPath.length(), 0);
+		
+		payload[fullCommPath.length()] = '\0';
+	}
+	else if(strncmp("VERSION", pkt, 7) == 0)
+	{
+		
 	}
 	
-	return rtn;
+	// If the response handler matched any commands
+	if(payload != NULL)
+	{
+		unsigned int payloadSize = strlen(payload);
+		char* packet = new char[4 + payloadSize + 1];
+		
+		// Prepare the packet
+		u_int32_t s = htonl(payloadSize);
+		memcpy(&packet, &s, 4);
+		
+		memcpy(packet + 3, payload, payloadSize);
+		packet[4 + payloadSize] = '\0';
+		
+		send(socket, packet, 4 + payloadSize, 0);
+		
+		delete packet;
+		delete payload;
+	}
+	
+	return;
 }
 
 unsigned int IPCServer::CreateNewComm() {
