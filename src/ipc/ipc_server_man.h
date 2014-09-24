@@ -52,6 +52,13 @@ public:
 \*===============================================================*/
 	
 	/**
+	 * Receives the full payload of the data.
+	 * 
+     * @return Payload
+     */
+	char* RecvPayload(int socket, u_int32_t payloadSize);
+	
+	/**
 	 * Assigns/Creates a new communication path.
 	 * 
      * @return Newly created communication path/name.

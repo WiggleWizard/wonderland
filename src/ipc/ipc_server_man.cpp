@@ -1,9 +1,11 @@
 #include "ipc_server_man.h"
 #include "ipc_comm.h"
+#include "../globals.h"
 
 #include <sys/un.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <netinet/in.h>
 
 std::vector<IPCComm*> IPCServer::clientComms;
 
@@ -57,9 +59,11 @@ void* IPCServer::ThreadedCommAllocator(void* serverPtr) {
 		printf("Listen failed, error: %i\n", errno);
 		exit(1);
 	}
+        
+	printf("IPC (v%i) server started\n", IPC_VER);
 	
 	// Accept connections indefinitely
-	while(true)	{
+	while(true) {
 		printf("Awaiting new connection\n");
 		
 		struct sockaddr_un remote;
@@ -75,23 +79,33 @@ void* IPCServer::ThreadedCommAllocator(void* serverPtr) {
 		printf("Connection established\n");
 		
 		// Once connected we need to get data from the client
-		char rxRaw[5];
-		std::string rxString = "";
-		unsigned int rxSize = sizeof(rxRaw) - 1; // Actual string size
+		char rxRaw[4]; // 8bytes (1st int is version, 2nd int is size of payload)
+		std::string rxString = ""; // Used for debugging
+		unsigned int rxSize = sizeof(rxRaw);
 		int rxStatus = 0;
 		
+		char* payload = NULL;
+		
 		while(true) {
-			// Ensure we have a C style string every transmittion (0x00 marking end of string)
-			memset(&rxRaw, 0x00, sizeof(rxRaw));
-			
-			rxStatus = recv(clientSock, rxRaw, rxSize, 0);
+			rxStatus = recv(clientSock, &rxRaw, 4, 0);
 			
 			// An error occurred -OR- EOS
 			if(rxStatus <= 0)
 				break;
 			
-			// Collate the data
-			rxString.append(rxRaw, rxSize);
+			//payload = server->RecvPayload(clientSock, (u_int32_t) rxRaw[4]);
+			
+			// Collate the data for debugging
+			//rxString.append(rxRaw, (u_int32_t) rxRaw[3]);
+			
+			printf("Payload: ");
+			for(int i = 0; i<4; i++)
+			{
+				printf("%02x:", rxRaw[i]);
+			}
+			printf("\n");
+			
+			printf("Version: %i\n", (u_int32_t) rxRaw);
 			
 			// Indicates end of transmission
 			if(rxRaw[rxSize - 1] == 0x00)
@@ -106,6 +120,23 @@ void* IPCServer::ThreadedCommAllocator(void* serverPtr) {
 		printf("Full transmission: %s\n", rxString.c_str());
 		printf("Client disconnected\n");
 	}
+}
+
+char* IPCServer::RecvPayload(int socket, u_int32_t payloadSize)
+{
+	char* payload = new char[payloadSize];
+	
+	unsigned int curPos     = 0;
+	unsigned int bufferSize = 64; // Recv 64bytes every read
+	
+	while(curPos < payloadSize)
+	{
+		recv(socket, &payload[curPos], bufferSize, 0);
+		
+		curPos += bufferSize;
+	}
+	
+	return payload;
 }
 
 

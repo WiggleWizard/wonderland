@@ -33,6 +33,7 @@
           <itemPath>src/ipc/ipc_server_man.cpp</itemPath>
           <itemPath>src/ipc/ipc_server_man.h</itemPath>
         </logicalFolder>
+        <itemPath>src/globals.cpp</itemPath>
         <itemPath>src/globals.h</itemPath>
         <itemPath>src/logger.cpp</itemPath>
         <itemPath>src/logger.h</itemPath>
@@ -88,6 +89,8 @@
       <item path="src/cod4/hook.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/cod4/hook.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/globals.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/globals.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -149,6 +152,8 @@
       <item path="src/cod4/hook.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/cod4/hook.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/globals.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/globals.h" ex="false" tool="3" flavor2="0">
       </item>
