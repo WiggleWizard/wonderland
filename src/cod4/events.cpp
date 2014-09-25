@@ -46,7 +46,7 @@ int Events::HPlayerSay(unsigned long playerPointer, int a2, int teamSay, char* m
 	ipcEvent->AddArgument((void*) argTeamSay, ipcTypes.uint);
 
 	// Broadcast the event
-	IPCServer::BroadcastEvent(ipcEvent);
+	IPCServer::SetEventForBroadcast(ipcEvent);
 	
 	printf("%X | %s\n", playerPointer, message);
 

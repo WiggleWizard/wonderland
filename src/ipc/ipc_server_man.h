@@ -86,7 +86,7 @@ public:
 	 * 
      * @param event
      */
-	static void BroadcastEvent(IPCCoD4Event* event);
+	static void SetEventForBroadcast(IPCCoD4Event* event);
 
 /*===============================================================*\
  * VARIABLES

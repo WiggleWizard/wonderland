@@ -214,7 +214,7 @@ unsigned int IPCServer::CreateNewComm()
 }
 
 // TODO: Refactor this function to SetEventForBroadcast
-void IPCServer::BroadcastEvent(IPCCoD4Event* event)
+void IPCServer::SetEventForBroadcast(IPCCoD4Event* event)
 {
 	// Add the event to the broadcast events vector
 	IPCServer::bCastLock.lock();
