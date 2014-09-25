@@ -35,14 +35,16 @@ void IPCComm::SignalSend() {
  * THREADS
 \*===============================================================*/
 
-void* IPCComm::ThreadedConstructor(void* ipcCommPtr) {
+void* IPCComm::ThreadedConstructor(void* ipcCommPtr)
+{
 	IPCComm* self = (IPCComm*) ipcCommPtr;
 	
 	int localSock;
 	struct sockaddr_un local;
 
 	// Create the socket
-	if((localSock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
+	if((localSock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
+	{
 		printf("Socket creation failed, error: %i\n", errno);
 		exit(1);
 	}
@@ -54,29 +56,32 @@ void* IPCComm::ThreadedConstructor(void* ipcCommPtr) {
 	unlink(local.sun_path); // Delete the original socket
 	unsigned int len = strlen(local.sun_path) + sizeof(local.sun_family);
 	
-	if(bind(localSock, (struct sockaddr *)&local, len) == -1) {
+	if(bind(localSock, (struct sockaddr *)&local, len) == -1)
+	{
 		printf("Binding failed, error: %i\n", errno);
 		exit(1);
 	}
 
 	// Start listening
-	if (listen(localSock, 5) == -1) {
+	if(listen(localSock, 5) == -1)
+	{
 		printf("Listen failed, error: %i\n", errno);
 		exit(1);
 	}
 	
-	printf("Awaiting new connection on comm channel\n");
+	printf("Rabbit hole %i initialized\n", self->commId);
 		
 	struct sockaddr_un remote;
 	unsigned int clientSockSize = sizeof(remote);
 
 	// Accept the first connection request
-	if((self->clientSocket = accept(localSock, (struct sockaddr *)&remote, &clientSockSize)) == -1) {
+	if((self->clientSocket = accept(localSock, (struct sockaddr *)&remote, &clientSockSize)) == -1)
+	{
 		printf("Accept failed, error: %i\n", errno);
 		exit(1);
 	}
 	
-	printf("A client has connected to the comm channel\n");
+	printf("Rabbit hole %i connection made\n", self->commId);
 	
 	// Create the listening thread
 	pthread_create(&self->listener, NULL, IPCComm::ThreadedListener, self);
@@ -85,7 +90,8 @@ void* IPCComm::ThreadedConstructor(void* ipcCommPtr) {
 	pthread_create(&self->sender, NULL, &IPCComm::ThreadedSender, self);
 }
 
-void* IPCComm::ThreadedListener(void* ipcCommPtr) {
+void* IPCComm::ThreadedListener(void* ipcCommPtr)
+{
 	IPCComm* self = (IPCComm*) ipcCommPtr;
 }
 

@@ -156,8 +156,9 @@ char* IPCServer::RecvPayload(int socket, u_int32_t payloadSize)
 	return payload;
 }
 
-void IPCServer::ResponseHandler(int socket, char* pkt) {
-	char* payload = NULL;
+void IPCServer::ResponseHandler(int socket, char* pkt)
+{
+	char* payload = NULL; // Modify payload to send it back to the client
 
 	// A request to go deeper into the rabbit hole
 	if(strncmp("RABBITHOLE", pkt, 10) == 0)
@@ -172,9 +173,12 @@ void IPCServer::ResponseHandler(int socket, char* pkt) {
 		
 		payload[fullCommPath.length()] = '\0';
 	}
+	// Version request
 	else if(strncmp("VERSION", pkt, 7) == 0)
 	{
-		
+		unsigned int s = strlen(WONDERLAND_VER);
+		payload = new char[s + 1];
+		memcpy(payload, WONDERLAND_VER, s + 1);
 	}
 	
 	// If the response handler matched any commands
@@ -185,9 +189,8 @@ void IPCServer::ResponseHandler(int socket, char* pkt) {
 		
 		// Prepare the packet
 		u_int32_t s = htonl(payloadSize);
-		memcpy(&packet, &s, 4);
-		
-		memcpy(packet + 3, payload, payloadSize);
+		memcpy(packet, &s, 4);
+		memcpy(packet + 4, payload, payloadSize);
 		packet[4 + payloadSize] = '\0';
 		
 		send(socket, packet, 4 + payloadSize, 0);
@@ -199,7 +202,8 @@ void IPCServer::ResponseHandler(int socket, char* pkt) {
 	return;
 }
 
-unsigned int IPCServer::CreateNewComm() {
+unsigned int IPCServer::CreateNewComm()
+{
 	// Prepare args for creating a new comm
 	unsigned int commId = this->clientComms.size();
 	
@@ -209,9 +213,11 @@ unsigned int IPCServer::CreateNewComm() {
 	return commId;
 }
 
-void IPCServer::BroadcastEvent(IPCCoD4Event* event) {
+void IPCServer::BroadcastEvent(IPCCoD4Event* event)
+{
 	// Signal all comm channels
-	for(unsigned int i=0; i<IPCServer::clientComms.size(); i++) {
+	for(unsigned int i=0; i<IPCServer::clientComms.size(); i++)
+	{
 		IPCComm* commChan = IPCServer::clientComms[i];
 		commChan->SignalSend();
 	}
