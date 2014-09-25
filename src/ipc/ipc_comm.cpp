@@ -21,7 +21,6 @@ IPCComm::IPCComm(unsigned int commId, std::string path, std::string prefix) {
 	pthread_create(&this->constructor, NULL, IPCComm::ThreadedConstructor, this);
 }
 
-IPCComm::IPCComm(const IPCComm& orig) {}
 IPCComm::~IPCComm() {}
 
 /*===============================================================*\
@@ -114,9 +113,9 @@ void* IPCComm::ThreadedSender(void* ipcCommPtr) {
 		for(unsigned int i = 0; i < s; i++)
 		{
 			event = IPCServer::broadcastEvents.at(i);
-
-			if(!event->IsCompiled())
-				event->Compile();
+			
+			// GetPacket() compiles and returns the char* to the packet
+			send(self->clientSocket, event->GetPacket(), 5, 0);
 		}
 		event = NULL;
 	}

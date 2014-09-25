@@ -41,9 +41,9 @@ int Events::HPlayerSay(unsigned long playerPointer, int a2, int teamSay, char* m
 	argMessage[messageLen] = '\0';
 
 	// Collate the arguments and types
-	IPCCoD4Event* ipcEvent = new IPCCoD4Event("CHAT");
-	ipcEvent->AddArgument((void*) argMessage, ipcTypes.ch);
-	ipcEvent->AddArgument((void*) argTeamSay, ipcTypes.uint);
+	IPCCoD4Event* ipcEvent = new IPCCoD4Event("CHAT\0");
+	ipcEvent->AddArgument((void*) argMessage, IPCTypes::ch);
+	ipcEvent->AddArgument((void*) argTeamSay, IPCTypes::uint);
 
 	// Broadcast the event
 	IPCServer::SetEventForBroadcast(ipcEvent);

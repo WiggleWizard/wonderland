@@ -3,20 +3,33 @@
 #include <string>
 #include <cstring>
 #include <typeinfo>
+#include <netinet/in.h>
 
 #include "../cod4/events.h"
+#include "../globals.h"
 
 IPCCoD4Event::IPCCoD4Event(const char* eventName)
 {
 	this->compiled = false;
+	this->packet   = NULL;
 
 	this->eventName = eventName;
 	this->argv      = std::vector<void*>(5);
 	this->argt      = std::vector<unsigned int>(5);
 }
 
-IPCCoD4Event::IPCCoD4Event(const IPCCoD4Event& orig) {}
-IPCCoD4Event::~IPCCoD4Event() {}
+IPCCoD4Event::~IPCCoD4Event()
+{
+	// Free up memory
+	unsigned int args = this->argv.size();
+	for(unsigned int i = 0; i < args; i++)
+	{
+		delete this->argv.at(i);
+	}
+	
+	delete this->eventName;
+	delete this->packet;
+}
 
 /*===============================================================*\
  * 
@@ -31,6 +44,10 @@ void IPCCoD4Event::AddArgument(void* arg, unsigned int type)
 void IPCCoD4Event::Compile()
 {
 	std::lock_guard<std::mutex> lock(this->compileLock);
+	
+	// Clean up memory if exists
+	if(this->packet != NULL)
+		delete this->packet;
 
 	unsigned int payloadSize = 0;
 	unsigned int args        = this->argv.size();
@@ -44,15 +61,21 @@ void IPCCoD4Event::Compile()
 	{
 		// We check the type then cast it if needed and add to the
 		// payload size
-		if(this->argt.at(i) == ipcTypes.uint || this->argt.at(i) == ipcTypes.sint)
+		if(this->argt.at(i) == IPCTypes::uint || this->argt.at(i) == IPCTypes::sint)
 			payloadSize += 4;
-		else if(this->argt.at(i) == ipcTypes.ch)
+		else if(this->argt.at(i) == IPCTypes::ch)
 			payloadSize += strlen((char*) this->argv.at(i));
 	}
+	
+	this->packetLen = 4 + payloadSize;
 
 	// Prepare the packet
-	this->packet.reserve(4 + payloadSize);
+	this->packet = new char[4 + payloadSize];
 	
+	u_int32_t s = htonl(payloadSize); // Payload size
+	memcpy(this->packet, &s, 4);
+	this->packet[4] = 'E';            // Packet type
+	memcpy(this->packet + 5);
 
 	// Now we construct the packet
 	for(unsigned int i = 0; i < args; i++)
@@ -69,4 +92,17 @@ void IPCCoD4Event::Compile()
 bool IPCCoD4Event::IsCompiled()
 {
 	return this->compiled;
+}
+
+char* IPCCoD4Event::GetPacket()
+{
+	if(!this->compiled)
+		this->Compile();
+	
+	return this->packet;
+}
+
+unsigned int IPCCoD4Event::GetPacketSize()
+{
+	return this->packetLen;
 }

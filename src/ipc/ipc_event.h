@@ -27,6 +27,8 @@ public:
 \*===============================================================*/
 
 	bool IsCompiled();
+	char* GetPacket();
+	unsigned int GetPacketSize();
 
 private:
 	const char* eventName;
@@ -34,7 +36,8 @@ private:
 	std::vector<unsigned int> argt;
 
 	bool compiled;
-	std::string packet;
+	char* packet;
+	unsigned int packetLen;
 
 	std::mutex compileLock;
 };

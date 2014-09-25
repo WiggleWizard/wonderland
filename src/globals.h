@@ -5,10 +5,10 @@
 extern bool DEBUG_MODE;
 
 extern struct IPCTypes {
-	unsigned int uint = 1; // Unsigned int
-	unsigned int sint = 2; // Signed int
-	unsigned int ch   = 3; // Characters
-} ipcTypes;
+	static const unsigned int uint = 1; // Unsigned int
+	static const unsigned int sint = 2; // Signed int
+	static const unsigned int ch   = 3; // Characters
+} IPCTypes;
 
 extern unsigned int IPC_VER;
 extern const char* WONDERLAND_VER;

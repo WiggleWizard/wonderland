@@ -7,7 +7,9 @@
 #include <unistd.h>
 #include <netinet/in.h>
 
-std::vector<IPCComm*> IPCServer::clientComms;
+std::vector<IPCComm*>      IPCServer::clientComms;
+std::vector<IPCCoD4Event*> IPCServer::broadcastEvents;
+std::mutex                 IPCServer::bCastLock;
 
 IPCServer::IPCServer(std::string path) {
 	// Initialize the client holder
@@ -213,7 +215,6 @@ unsigned int IPCServer::CreateNewComm()
 	return commId;
 }
 
-// TODO: Refactor this function to SetEventForBroadcast
 void IPCServer::SetEventForBroadcast(IPCCoD4Event* event)
 {
 	// Add the event to the broadcast events vector
