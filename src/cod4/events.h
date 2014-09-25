@@ -18,15 +18,6 @@ public:
 	
 	static void InsertHooks();
 	
-	/**
-	 * Gets the event's ID, used mostly for packet crafting.
-	 * 
-     * @param loc Location to the event.
-     * @return 
-     */
-	static unsigned int GetEventId(unsigned long loc);
-	
-	
 /*===============================================================*\
  * EVENTS
 \*===============================================================*/

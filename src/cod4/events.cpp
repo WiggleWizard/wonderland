@@ -11,18 +11,14 @@ Events::Events() {}
 Events::Events(const Events& orig) {}
 Events::~Events() {}
 
-void Events::InsertHooks() {
+void Events::InsertHooks()
+{
 	Events::hPlayerSay = new Hook((void*) Events::locPlayerSay, 5, (void*) Events::HPlayerSay);
 }
 
-
-unsigned int Events::GetEventId(unsigned long loc) {
-	if(loc == Events::locPlayerSay)
-		return 1;
-	
-	return 0;
-}
-
+/*===============================================================*\
+ * EVENTS
+\*===============================================================*/
 
 /**
 * Triggered when the player says something
@@ -42,6 +38,7 @@ int Events::HPlayerSay(unsigned long playerPointer, int a2, int teamSay, char* m
 	unsigned int messageLen = strlen(message);
 	char* argMessage = new char[messageLen + 1];
 	memcpy(argMessage, message, messageLen);
+	argMessage[messageLen] = '\0';
 
 	// Collate the arguments and types
 	IPCCoD4Event* ipcEvent = new IPCCoD4Event("CHAT");
