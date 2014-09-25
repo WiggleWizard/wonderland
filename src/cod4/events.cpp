@@ -33,8 +33,23 @@ unsigned int Events::GetEventId(unsigned long loc) {
 * @param a4 Pointer to the character for message
 * @return 
 */
-int Events::HPlayerSay(unsigned long playerPointer, int a2, int teamSay, char* message) {
-	//IPCServer::BroadcastEvent(new IPCCoD4Event(GetEventId(this), types.ch, message));
+int Events::HPlayerSay(unsigned long playerPointer, int a2, int teamSay, char* message)
+{
+	// Prepare the arguments and types for the event
+	int* argTeamSay = new int;
+	*argTeamSay = teamSay;
+
+	unsigned int messageLen = strlen(message);
+	char* argMessage = new char[messageLen + 1];
+	memcpy(argMessage, message, messageLen);
+
+	// Collate the arguments and types
+	IPCCoD4Event* ipcEvent = new IPCCoD4Event("CHAT");
+	ipcEvent->AddArgument((void*) argMessage, ipcTypes.ch);
+	ipcEvent->AddArgument((void*) argTeamSay, ipcTypes.uint);
+
+	// Broadcast the event
+	IPCServer::BroadcastEvent(ipcEvent);
 	
 	printf("%X | %s\n", playerPointer, message);
 

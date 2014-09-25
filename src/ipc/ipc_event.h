@@ -3,29 +3,28 @@
 
 #include <string>
 #include <typeinfo>
+#include <vector>
 
 class IPCCoD4Event {
 	static const char delim = 0x01;
 public:
-	IPCCoD4Event(unsigned int eventId, unsigned int a1type, char* a1);
-	IPCCoD4Event(unsigned int eventId, char* a1, char* a2);
+	IPCCoD4Event(const char* eventName);
+
 	IPCCoD4Event(const IPCCoD4Event& orig);
 	virtual ~IPCCoD4Event();
 	
 /*===============================================================*\
- * COMPILE TEMPLATES
+ * 
 \*===============================================================*/
 	
 	void Compile();
+	void AddArgument(void* arg, unsigned int type);
 private:
+	char* eventName;
+	std::vector<void*> argv;
+	std::vector<unsigned int> argt;
+
 	std::string packetString;
-	
-	unsigned int eventId;
-	
-	char* a1;
-	char* a2;
-	char* a3;
-	char* a4;
 };
 
 #endif	/* IPC_EVENT_PKT_H */

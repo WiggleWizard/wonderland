@@ -1,7 +1,6 @@
 #include "globals.h"
 
 bool DEBUG_MODE = true;
-
 unsigned int IPC_VER = 1;
 const char* WONDERLAND_VER = "0.1b\0";
 

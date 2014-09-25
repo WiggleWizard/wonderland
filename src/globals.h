@@ -4,10 +4,11 @@
 // Enables or disables debug mode.
 extern bool DEBUG_MODE;
 
-extern struct types {
+extern struct IPCTypes {
 	unsigned int uint = 1; // Unsigned int
-	unsigned int ch   = 2; // Characters
-} types;
+	unsigned int sint = 2; // Signed int
+	unsigned int ch   = 3; // Characters
+} ipcTypes;
 
 extern unsigned int IPC_VER;
 extern const char* WONDERLAND_VER;
