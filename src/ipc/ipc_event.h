@@ -4,9 +4,11 @@
 #include <string>
 #include <typeinfo>
 #include <vector>
+#include <mutex>
+
+#include "../globals.h"
 
 class IPCCoD4Event {
-	static const char delim = 0x01;
 public:
 	IPCCoD4Event(const char* eventName);
 
@@ -19,12 +21,22 @@ public:
 	
 	void Compile();
 	void AddArgument(void* arg, unsigned int type);
+
+/*===============================================================*\
+ * GTORS & STORS
+\*===============================================================*/
+
+	bool IsCompiled();
+
 private:
-	char* eventName;
+	const char* eventName;
 	std::vector<void*> argv;
 	std::vector<unsigned int> argt;
 
-	std::string packetString;
+	bool compiled;
+	std::string packet;
+
+	std::mutex compileLock;
 };
 
 #endif	/* IPC_EVENT_PKT_H */

@@ -213,12 +213,21 @@ unsigned int IPCServer::CreateNewComm()
 	return commId;
 }
 
+// TODO: Refactor this function to SetEventForBroadcast
 void IPCServer::BroadcastEvent(IPCCoD4Event* event)
 {
-	// Signal all comm channels
-	for(unsigned int i=0; i<IPCServer::clientComms.size(); i++)
+	// Add the event to the broadcast events vector
+	IPCServer::bCastLock.lock();
+	IPCServer::broadcastEvents.push_back(event);
+	IPCServer::bCastLock.unlock();
+
+	// Signal all comm channels that an event has triggered
+	IPCComm* rabbitHole = NULL;
+	unsigned int s = IPCServer::clientComms.size();
+	for(unsigned int i = 0; i < s; i++)
 	{
-		IPCComm* commChan = IPCServer::clientComms[i];
-		commChan->SignalSend();
+		rabbitHole = IPCServer::clientComms[i];
+		rabbitHole->SignalSend();
 	}
+	rabbitHole = NULL;
 }

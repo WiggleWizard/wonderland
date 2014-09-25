@@ -9,6 +9,7 @@
 
 #include <string>
 #include <vector>
+#include <mutex>
 
 #include "ipc_event.h"
 
@@ -93,16 +94,20 @@ public:
 	
 	// Tracks client comms
 	static std::vector<IPCComm*> clientComms;
+
+	// Holds event type packets which should be broadcasted across
+	// all connected clients.
+	static std::vector<IPCCoD4Event*> broadcastEvents;
 	
 private:
 	pthread_t listener;
 	
 	std::string clientCommPrefix;
 	std::string clientCommPath;
+
+	static std::mutex bCastLock;
 	
-	// Holds event type packets which should be broadcasted across
-	// all connected clients.
-	static std::vector<IPCCoD4Event*> bcastEvents;
+	
 };
 
 #endif	/* SERVER_H */

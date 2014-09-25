@@ -1,6 +1,7 @@
 #include "ipc_comm.h"
 
 #include "ipc_event.h"
+#include "ipc_server_man.h"
 
 #include <string>
 #include <sys/un.h>
@@ -108,9 +109,16 @@ void* IPCComm::ThreadedSender(void* ipcCommPtr) {
 		pthread_cond_wait(&self->sendSig, &self->sendLock);
 		
 		// Compile and send each IPC Event
-//		for(unsigned int i=0; i<self->sendQueue.size(); i++) {
-//			char* txPkt = self->sendQueue.at(i).Compile();
-//		}
+		IPCCoD4Event* event = NULL;
+		unsigned int s = IPCServer::broadcastEvents.size();
+		for(unsigned int i = 0; i < s; i++)
+		{
+			event = IPCServer::broadcastEvents.at(i);
+
+			if(!event->IsCompiled())
+				event->Compile();
+		}
+		event = NULL;
 	}
 }
 
