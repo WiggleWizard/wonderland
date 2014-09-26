@@ -24,7 +24,8 @@ IPCCoD4Event::~IPCCoD4Event()
 	unsigned int args = this->argv.size();
 	for(unsigned int i = 0; i < args; i++)
 	{
-		delete this->argv.at(i);
+		if(this->argt[i] == IPCTypes::ch)
+			delete (char*) this->argv[i];
 	}
 	
 	delete this->eventName;
@@ -67,19 +68,52 @@ void IPCCoD4Event::Compile()
 			payloadSize += strlen((char*) this->argv.at(i));
 	}
 	
-	this->packetLen = 4 + payloadSize;
+	this->packetLen = 4 + payloadSize + 1;
 
 	// Prepare the packet
-	this->packet = new char[4 + payloadSize];
-	
-	u_int32_t s = htonl(payloadSize); // Payload size
-	memcpy(this->packet, &s, 4);
-	this->packet[4] = 'E';            // Packet type
-	memcpy(this->packet + 5);
+	u_int32_t cursor = 0;
+	this->packet = new char[this->packetLen];
+	// --- Packet type
+	this->packet[4] = 'E';
+	cursor += 1;
+	// --- Payload size
+	u_int32_t s = htonl(payloadSize);
+	memcpy(this->packet + cursor, &s, 4);
+	cursor += 4;
+	// --- Command size
+	unsigned int sz = strlen(this->eventName);
+	s = htonl(sz);
+	memcpy(this->packet + cursor, &s, 4);
+	cursor += 4;
+	// --- Command
+	memcpy(this->packet + cursor, this->eventName, sz);
+	cursor += sz;
+	// --- Args (Arg size/count)
+	s = htonl(args);
+	memcpy(this->packet + cursor, &s, 4);
+	cursor += 4;
 
-	// Now we construct the packet
+	// --- Argv
 	for(unsigned int i = 0; i < args; i++)
 	{
+		// ---- Arg type
+		this->packet[cursor] = this->argt.at(i);
+		cursor += 1;
+
+		// ---- Arg value
+		// Depending on the arg type, we have to copy it differently
+		if(this->argt.at(i) == IPCTypes::uint || this->argt.at(i) == IPCTypes::sint)
+		{
+			s = htonl((u_int32_t) this->argv.at(i));
+			memcpy(this->packet + cursor, &s, 4);
+			cursor += 4;
+		}
+		else if(this->argt.at(i) == IPCTypes::ch)
+		{
+			unsigned int argvSize = strlen((char*) this->argv.at(i));
+			memcpy(this->packet + cursor, (char*) this->argv.at(i), argvSize);
+			cursor += argvSize;
+		}
 	}
 
 	this->compiled = true;

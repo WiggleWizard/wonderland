@@ -5,9 +5,9 @@
 extern bool DEBUG_MODE;
 
 extern struct IPCTypes {
-	static const unsigned int uint = 1; // Unsigned int
-	static const unsigned int sint = 2; // Signed int
-	static const unsigned int ch   = 3; // Characters
+	static const unsigned char uint = 0x01; // Unsigned int
+	static const unsigned char sint = 0x02; // Signed int
+	static const unsigned char ch   = 0x03; // Characters
 } IPCTypes;
 
 extern unsigned int IPC_VER;

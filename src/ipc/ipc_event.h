@@ -29,6 +29,8 @@ public:
 	bool IsCompiled();
 	char* GetPacket();
 	unsigned int GetPacketSize();
+	void Sent();
+	unsigned int SentTimes();
 
 private:
 	const char* eventName;
@@ -36,10 +38,12 @@ private:
 	std::vector<unsigned int> argt;
 
 	bool compiled;
+	unsigned int sent;
 	char* packet;
 	unsigned int packetLen;
 
 	std::mutex compileLock;
+	std::mutex sentTimeLock;
 };
 
 #endif	/* IPC_EVENT_PKT_H */

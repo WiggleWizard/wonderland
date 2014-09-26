@@ -88,6 +88,13 @@ public:
      */
 	static void SetEventForBroadcast(IPCCoD4Event* event);
 
+	/**
+	 * Removes the specified event from the broadcasting stack.
+	 * 
+     * @param event
+     */
+	static void DestroyEvent(IPCCoD4Event* event);
+
 /*===============================================================*\
  * VARIABLES
 \*===============================================================*/
@@ -105,7 +112,7 @@ private:
 	std::string clientCommPrefix;
 	std::string clientCommPath;
 
-	static std::mutex bCastLock;
+	static std::mutex bCastLock; // TODO: Refactor to name: bcastEventStackLock
 	
 	
 };

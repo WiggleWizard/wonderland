@@ -14,6 +14,9 @@ std::mutex                 IPCServer::bCastLock;
 IPCServer::IPCServer(std::string path) {
 	// Initialize the client holder
 	this->clientComms.reserve(5);
+
+	// Allocate some memory for the broadcastEvents stack
+	IPCServer::broadcastEvents.reserve(20);
 	
 	this->clientCommPrefix = "rabbithole-";
 	this->clientCommPath   = "/tmp/";
@@ -219,16 +222,52 @@ void IPCServer::SetEventForBroadcast(IPCCoD4Event* event)
 {
 	// Add the event to the broadcast events vector
 	IPCServer::bCastLock.lock();
-	IPCServer::broadcastEvents.push_back(event);
+	
+	bool found = false;
+	unsigned int s = IPCServer::broadcastEvents.size();
+	for(unsigned int i = 0; i < s; i++)
+	{
+		if(IPCServer::broadcastEvents[i] == NULL)
+		{
+			IPCServer::broadcastEvents[i] = event;
+			found = true;
+
+			break;
+		}
+	}
+
+	// If no free spot was found in the list then just push into the stack
+	if(!found)
+		IPCServer::broadcastEvents.push_back(event);
+
 	IPCServer::bCastLock.unlock();
 
 	// Signal all comm channels that an event has triggered
 	IPCComm* rabbitHole = NULL;
-	unsigned int s = IPCServer::clientComms.size();
+	s = IPCServer::clientComms.size();
 	for(unsigned int i = 0; i < s; i++)
 	{
 		rabbitHole = IPCServer::clientComms[i];
 		rabbitHole->SignalSend();
 	}
 	rabbitHole = NULL;
+}
+
+void IPCServer::DestroyEvent(IPCCoD4Event* event)
+{
+	IPCServer::bCastLock.lock();
+
+	unsigned int s = IPCServer::broadcastEvents.size();
+	for(unsigned int i = 0; i < s; i++)
+	{
+		if(event == IPCServer::broadcastEvents[i])
+		{
+			// Free the memory first
+			delete IPCServer::broadcastEvents[i];
+
+			IPCServer::broadcastEvents[i] = NULL;
+		}	
+	}
+
+	IPCServer::bCastLock.unlock();
 }

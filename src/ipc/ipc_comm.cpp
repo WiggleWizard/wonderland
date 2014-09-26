@@ -107,18 +107,28 @@ void* IPCComm::ThreadedSender(void* ipcCommPtr) {
 		// The thread will only continue once the signal has been triggered
 		pthread_cond_wait(&self->sendSig, &self->sendLock);
 		
-		// Compile and send each IPC Event
+		// Compile and send each Event
 		IPCCoD4Event* event = NULL;
 		unsigned int s = IPCServer::broadcastEvents.size();
 		for(unsigned int i = 0; i < s; i++)
 		{
 			event = IPCServer::broadcastEvents.at(i);
 			
-			// GetPacket() compiles and returns the char* to the packet
+			// Returns the char* to the packet
 			send(self->clientSocket, event->GetPacket(), 5, 0);
+
+			// Adds 1 to the sent counter
+			event->Sent();
+
+			// Double checks the sent counter, if it's equal to the same
+			// amount of clients running then it's disposed of
+			if(event->SentTimes() >= IPCServer::clientComms.size())
+				IPCServer::DestroyEvent(event);
 		}
 		event = NULL;
 	}
+
+	return NULL;
 }
 
 /*===============================================================*\
