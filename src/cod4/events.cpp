@@ -1,6 +1,7 @@
 #include "events.h"
 
 #include "hook.h"
+#include "callables.h"
 #include "../globals.h"
 #include "../ipc/ipc_event.h"
 #include "../ipc/ipc_server_man.h"
@@ -29,7 +30,7 @@ void Events::InsertHooks()
 * @param a4 Pointer to the character for message
 * @return 
 */
-int Events::HPlayerSay(unsigned long playerPointer, int a2, int teamSay, char* message)
+int Events::HPlayerSay(unsigned int* playerId, int a2, int teamSay, char* message)
 {
 	// Prepare the arguments and types for the event
 	int* argTeamSay = new int;
@@ -41,14 +42,17 @@ int Events::HPlayerSay(unsigned long playerPointer, int a2, int teamSay, char* m
 	argMessage[messageLen] = '\0';
 
 	// Collate the arguments and types
-	IPCCoD4Event* ipcEvent = new IPCCoD4Event("CHAT\0");
+	char* cmd = new char[4 + 1];
+	strcpy(cmd, "CHAT");
+	IPCCoD4Event* ipcEvent = new IPCCoD4Event(cmd);
+	ipcEvent->AddArgument((void*) 5, IPCTypes::uint);
 	ipcEvent->AddArgument((void*) argMessage, IPCTypes::ch);
-	ipcEvent->AddArgument((void*) argTeamSay, IPCTypes::uint);
+	
 
 	// Broadcast the event
 	IPCServer::SetEventForBroadcast(ipcEvent);
 	
-	printf("%X | %s\n", playerPointer, message);
+	printf("[%i]: %s\n", *playerId, message);
 
 	return 0;
 }

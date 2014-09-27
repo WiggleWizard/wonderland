@@ -8,28 +8,30 @@
 #include "../cod4/events.h"
 #include "../globals.h"
 
-IPCCoD4Event::IPCCoD4Event(const char* eventName)
+IPCCoD4Event::IPCCoD4Event(char* eventName)
 {
 	this->compiled = false;
 	this->packet   = NULL;
 
 	this->eventName = eventName;
-	this->argv      = std::vector<void*>(5);
-	this->argt      = std::vector<unsigned int>(5);
+	this->argv.reserve(5);
+	this->argt.reserve(5);
 }
 
 IPCCoD4Event::~IPCCoD4Event()
 {
+	printf("Deconstruction of event\n");
+	
 	// Free up memory
 	unsigned int args = this->argv.size();
 	for(unsigned int i = 0; i < args; i++)
 	{
 		if(this->argt[i] == IPCTypes::ch)
-			delete (char*) this->argv[i];
+			delete [] (char*) this->argv[i];
 	}
 	
-	delete this->eventName;
-	delete this->packet;
+	delete [] this->eventName;
+	delete [] this->packet;
 }
 
 /*===============================================================*\
@@ -54,32 +56,42 @@ void IPCCoD4Event::Compile()
 	unsigned int args        = this->argv.size();
 
 	// We first estimate how total length of the payload
-	payloadSize += 1; // Byte for packet type
-	payloadSize += 4; // For the size of the command
-	payloadSize += strlen(this->eventName);
+	payloadSize += 4;                       // Command size
+	payloadSize += strlen(this->eventName); // Command
+	payloadSize += 4;                       // Arg count
 
 	for(unsigned int i = 0; i < args; i++)
 	{
+		// Make space for arg type
+		payloadSize += 1;
+		
 		// We check the type then cast it if needed and add to the
 		// payload size
 		if(this->argt.at(i) == IPCTypes::uint || this->argt.at(i) == IPCTypes::sint)
+		{
 			payloadSize += 4;
+		}
 		else if(this->argt.at(i) == IPCTypes::ch)
+		{
+			// Make space for both the size and value
+			payloadSize += 4;
 			payloadSize += strlen((char*) this->argv.at(i));
+		}
 	}
 	
-	this->packetLen = 4 + payloadSize + 1;
+	this->packetLen = 1 + 4 + payloadSize;
 
 	// Prepare the packet
 	u_int32_t cursor = 0;
 	this->packet = new char[this->packetLen];
 	// --- Packet type
-	this->packet[4] = 'E';
+	this->packet[0] = 'E';
 	cursor += 1;
 	// --- Payload size
 	u_int32_t s = htonl(payloadSize);
 	memcpy(this->packet + cursor, &s, 4);
 	cursor += 4;
+	
 	// --- Command size
 	unsigned int sz = strlen(this->eventName);
 	s = htonl(sz);
@@ -110,7 +122,13 @@ void IPCCoD4Event::Compile()
 		}
 		else if(this->argt.at(i) == IPCTypes::ch)
 		{
+			// We have to write the size of the string and the string itself
 			unsigned int argvSize = strlen((char*) this->argv.at(i));
+			
+			s = htonl(argvSize);
+			memcpy(this->packet + cursor, &s, 4);
+			cursor += 4;
+			
 			memcpy(this->packet + cursor, (char*) this->argv.at(i), argvSize);
 			cursor += argvSize;
 		}
@@ -129,14 +147,25 @@ bool IPCCoD4Event::IsCompiled()
 }
 
 char* IPCCoD4Event::GetPacket()
-{
-	if(!this->compiled)
-		this->Compile();
-	
+{	
 	return this->packet;
 }
 
 unsigned int IPCCoD4Event::GetPacketSize()
 {
 	return this->packetLen;
+}
+
+void IPCCoD4Event::Sent()
+{
+	std::lock_guard<std::mutex> lock(this->sentTimeLock);
+	
+	this->sent++;
+}
+
+unsigned int IPCCoD4Event::SentTimes()
+{
+	std::lock_guard<std::mutex> lock(this->sentTimeLock);
+	
+	return this->sent;
 }

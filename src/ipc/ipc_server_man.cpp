@@ -118,9 +118,9 @@ void* IPCServer::ThreadedCommAllocator(void* serverPtr) {
 
 			// Handle the response back to the client
 			server->ResponseHandler(clientSock, payload);
+			
+			delete payload;
 		}
-		
-		delete payload;
 
 		printf("Client disconnected\n");
 	}

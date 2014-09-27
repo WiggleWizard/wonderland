@@ -22,7 +22,7 @@ public:
  * EVENTS
 \*===============================================================*/
 	
-	static int HPlayerSay(unsigned long playerPointer, int a2, int teamSay, char* message);
+	static int HPlayerSay(unsigned int* playerId, int a2, int teamSay, char* message);
 	
 /*===============================================================*\
  * HOOK VARIABLES

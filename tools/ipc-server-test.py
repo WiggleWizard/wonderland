@@ -41,7 +41,21 @@ print("Rabbithole connection successful")
 
 while True:
 	rx = rabbithole.recv(512)
-	print(list(bytearray(rx)))
+	#print(list(bytearray(rx)))
+	#print(rx)
+
+	payload = struct.pack('>I', len("BCAST"))
+	payload += "BCAST"
+	payload += "\x01"
+	payload += "\x03"
+	payload += struct.pack('>I', len("Testing packet recv with a BCAST'd chat"))
+	payload += "Testing packet recv with a BCAST'd chat"
+
+	print(list(bytearray(payload)))
+
+	packet = 'V' + struct.pack('>I', len(payload)) + payload
+
+	rabbithole.send(packet)
 
 	if not rx:
 		print("Rabbit hole disconnected")

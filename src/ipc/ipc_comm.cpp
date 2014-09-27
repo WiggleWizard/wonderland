@@ -7,6 +7,7 @@
 #include <sys/un.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <netinet/in.h>
 
 IPCComm::IPCComm(unsigned int commId, std::string path, std::string prefix) {
 	this->commId = commId;
@@ -22,14 +23,6 @@ IPCComm::IPCComm(unsigned int commId, std::string path, std::string prefix) {
 }
 
 IPCComm::~IPCComm() {}
-
-/*===============================================================*\
- * FUNCTIONS
-\*===============================================================*/
-
-void IPCComm::SignalSend() {
-	pthread_cond_signal(&this->sendSig);
-}
 
 /*===============================================================*\
  * THREADS
@@ -93,6 +86,37 @@ void* IPCComm::ThreadedConstructor(void* ipcCommPtr)
 void* IPCComm::ThreadedListener(void* ipcCommPtr)
 {
 	IPCComm* self = (IPCComm*) ipcCommPtr;
+	
+	while(true)
+	{
+		char seq[5];
+		int rxStatus = 0;
+		u_int32_t payloadLen = 0;
+		uint8_t packetType;
+		
+		char* payload = NULL;
+		
+		// All incoming packets will be prefixed with 5 bytes of important
+		// information.
+		rxStatus = recv(self->clientSocket, &seq, 5, 0);
+		
+		// An error occurred -OR- EOS
+		if(rxStatus <= 0)
+			break;
+		
+		// Retrieve data from the packet
+		packetType = seq[0];
+		payloadLen = ntohl(*(u_int32_t*) &seq[1]);
+		
+		if(packetType == 'V')
+		{
+			payload = self->RecvChunk(self->clientSocket, payloadLen);
+			
+			self->ParseVoidFunctionPayload(payload);
+			
+			delete payload;
+		}
+	}
 }
 
 /**
@@ -100,10 +124,12 @@ void* IPCComm::ThreadedListener(void* ipcCommPtr)
  * @param ipcCommPtr
  * @return 
  */
-void* IPCComm::ThreadedSender(void* ipcCommPtr) {
+void* IPCComm::ThreadedSender(void* ipcCommPtr)
+{
 	IPCComm* self = (IPCComm*) ipcCommPtr;
 	
-	while(true) {
+	while(true)
+	{
 		// The thread will only continue once the signal has been triggered
 		pthread_cond_wait(&self->sendSig, &self->sendLock);
 		
@@ -114,8 +140,9 @@ void* IPCComm::ThreadedSender(void* ipcCommPtr) {
 		{
 			event = IPCServer::broadcastEvents.at(i);
 			
-			// Returns the char* to the packet
-			send(self->clientSocket, event->GetPacket(), 5, 0);
+			// Compile and send
+			event->Compile();
+			send(self->clientSocket, event->GetPacket(), event->GetPacketSize(), 0);
 
 			// Adds 1 to the sent counter
 			event->Sent();
@@ -129,6 +156,109 @@ void* IPCComm::ThreadedSender(void* ipcCommPtr) {
 	}
 
 	return NULL;
+}
+
+/*===============================================================*\
+ * FUNCTIONS
+\*===============================================================*/
+
+void IPCComm::SignalSend()
+{
+	pthread_cond_signal(&this->sendSig);
+}
+
+char* IPCComm::RecvChunk(int socket, u_int32_t chunkSize)
+{
+	// Make space for the payload, setting the last byte to 0x00 as if
+	// it was a C style string
+	char* payload = new char[chunkSize + 1];
+	
+	unsigned int curPos     = 0;
+	unsigned int currLen    = 0; // Amount of chars written to payload
+	unsigned int bufferSize = 8; // Recv 8 bytes every read
+	
+	while(curPos < chunkSize)
+	{
+		currLen = chunkSize - curPos;
+
+		// Set the recv size under certain circumstances
+		if(currLen < bufferSize)
+			bufferSize = currLen;
+		if(chunkSize < bufferSize)
+			bufferSize = chunkSize;
+
+		recv(socket, &payload[curPos], bufferSize, 0);
+		
+		curPos += bufferSize;
+	}
+	
+	payload[chunkSize] = '\0';
+	
+	return payload;
+}
+
+/*===============================================================*\
+ * PARSERS
+\*===============================================================*/
+
+void IPCComm::ParseVoidFunctionPayload(char* payload)
+{
+	unsigned int cursor = 0;
+	
+	// - Function name size
+	unsigned int funcSize = ntohl(*(uint32_t*) payload);
+	cursor += 4;
+	
+	// - Function name
+	char* function = new char[funcSize + 1];
+	function[funcSize] = '\0';
+	memcpy(function, payload + cursor, funcSize);
+	cursor += funcSize;
+	
+	// - Arg count
+	uint8_t argc = *(uint8_t*) (payload + cursor);
+	cursor += 1;
+	
+	// - Args
+	std::vector<void*>* argv = new std::vector<void*>;
+	argv->reserve(argc);
+	std::vector<uint8_t>* argt = new std::vector<uint8_t>;
+	argt->reserve(argc);
+	for(unsigned int i = 0; i < argc; i++)
+	{
+		// -- Type
+		argt->push_back(*(uint8_t*) (payload + cursor));
+		cursor += 1;
+		
+		// -- Value
+		if((*argt)[i] == IPCTypes::uint || (*argt)[i] == IPCTypes::sint)
+		{
+			// We first have to convert the network byte order integer to host
+			// order then make space for it in memory so we can keep it for
+			// later use.
+			uint32_t integer = ntohl(*(uint32_t*) (payload + cursor));
+			char* intSpace = new char[4];
+			
+			memcpy(intSpace, &integer, 4);
+			argv->push_back(intSpace);
+			
+			cursor += 4;
+		}
+		else if((*argt)[i] == IPCTypes::ch)
+		{
+			// --- Size of string
+			uint32_t s = ntohl(*(uint32_t*) (payload + cursor));
+			cursor += 4;
+			
+			// --- String value
+			char* str = new char[s + 1];
+			memcpy(str, payload + cursor, s);
+			str[s] = '\0';
+			argv->push_back(str);
+			
+			cursor += s;
+		}
+	}
 }
 
 /*===============================================================*\

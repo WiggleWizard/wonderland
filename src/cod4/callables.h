@@ -1,18 +1,15 @@
-/* 
- * File:   hook_callable.h
- * Author: zinglish
- *
- * Created on 18 May 2014, 17:35
- */
-
 #ifndef HOOK_CALLABLE_H
 #define	HOOK_CALLABLE_H
+
+#include <stdint.h>
 
 class Callables {
 public:
 	Callables();
 	Callables(const Callables& orig);
 	virtual ~Callables();
+	
+	uint32_t GetPlayerIdByOffset(uint32_t offset);
 private:
 
 };

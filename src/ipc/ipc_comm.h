@@ -16,7 +16,20 @@ public:
  * FUNCTIONS
 \*===============================================================*/
 	
+	/**
+	 * Signals the sender thread to send anything on the broadcast
+	 * or send stacks.
+     */
 	void SignalSend();
+	
+	/**
+	 * Receives an entire chunk of data.
+	 * 
+     * @param socket
+     * @param chunk
+     * @return 
+     */
+	char* RecvChunk(int socket, u_int32_t chunkSize);
 	
 /*===============================================================*\
  * THREADS
@@ -31,6 +44,18 @@ public:
 \*===============================================================*/
 	
 	std::string GetPath();
+	
+/*===============================================================*\
+ * PARSERS
+\*===============================================================*/
+	
+	/**
+	 * Parses payloads that are marked with 'V'. See Docs for
+	 * packet/payload specs.
+	 * 
+     * @param payload
+     */
+	void ParseVoidFunctionPayload(char* payload);
 	
 /*===============================================================*\
  * VARIABLES

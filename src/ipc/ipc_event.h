@@ -10,7 +10,7 @@
 
 class IPCCoD4Event {
 public:
-	IPCCoD4Event(const char* eventName);
+	IPCCoD4Event(char* eventName);
 
 	IPCCoD4Event(const IPCCoD4Event& orig);
 	virtual ~IPCCoD4Event();
@@ -33,7 +33,7 @@ public:
 	unsigned int SentTimes();
 
 private:
-	const char* eventName;
+	char* eventName;
 	std::vector<void*> argv;
 	std::vector<unsigned int> argt;
 
