@@ -13,6 +13,14 @@ public:
 	virtual ~IPCComm();
 	
 /*===============================================================*\
+ * THREADS
+\*===============================================================*/
+	
+	static void* ThreadedConstructor(void* self);
+	static void* ThreadedListener(void* self);
+	static void* ThreadedSender(void* self);
+	
+/*===============================================================*\
  * FUNCTIONS
 \*===============================================================*/
 	
@@ -31,13 +39,15 @@ public:
      */
 	char* RecvChunk(int socket, u_int32_t chunkSize);
 	
-/*===============================================================*\
- * THREADS
-\*===============================================================*/
-	
-	static void* ThreadedConstructor(void* self);
-	static void* ThreadedListener(void* self);
-	static void* ThreadedSender(void* self);
+	/**
+	 * Attempts execution of func. Ensure you clean up func, argv and argt
+	 * after execution of this function.
+	 * 
+     * @param func Function name.
+     * @param argv Vector of argument values.
+     * @param argt Vector of argument types.
+     */
+	void ExecVoidFunction(char* func, std::vector<void*>* argv, std::vector<uint8_t>* argt);
 	
 /*===============================================================*\
  * GTORS & STORS
@@ -50,12 +60,15 @@ public:
 \*===============================================================*/
 	
 	/**
-	 * Parses payloads that are marked with 'V'. See Docs for
-	 * packet/payload specs.
+	 * Parses payloads marked with 'V'. See the docs for the payload
+	 * specs.
 	 * 
-     * @param payload
+     * @param func Function name (Modified at runtime, init as NULL).
+     * @param argv Vector of argument values (Init as 'new').
+     * @param argt Vector of argument types (Init as 'new').
+     * @param payload Payload to be parsed.
      */
-	void ParseVoidFunctionPayload(char* payload);
+	void ParseVoidFunctionPayload(char* func, std::vector<void*>* argv, std::vector<uint8_t>* argt, char* payload);
 	
 /*===============================================================*\
  * VARIABLES

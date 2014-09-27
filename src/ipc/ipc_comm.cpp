@@ -110,9 +110,15 @@ void* IPCComm::ThreadedListener(void* ipcCommPtr)
 		
 		if(packetType == 'V')
 		{
+			// Get the entire payload
 			payload = self->RecvChunk(self->clientSocket, payloadLen);
 			
-			self->ParseVoidFunctionPayload(payload);
+			// Prep variables to be modified by the parse
+			char* func                 = NULL;
+			std::vector<void*>* argv   = new std::vector<void*>;
+			std::vector<uint8_t>* argt = new std::vector<uint8_t>;
+			
+			self->ParseVoidFunctionPayload(func, argv, argt, payload);
 			
 			delete payload;
 		}
@@ -201,7 +207,7 @@ char* IPCComm::RecvChunk(int socket, u_int32_t chunkSize)
  * PARSERS
 \*===============================================================*/
 
-void IPCComm::ParseVoidFunctionPayload(char* payload)
+void IPCComm::ParseVoidFunctionPayload(char* func, std::vector<void*>* argv, std::vector<uint8_t>* argt, char* payload)
 {
 	unsigned int cursor = 0;
 	
@@ -210,9 +216,9 @@ void IPCComm::ParseVoidFunctionPayload(char* payload)
 	cursor += 4;
 	
 	// - Function name
-	char* function = new char[funcSize + 1];
-	function[funcSize] = '\0';
-	memcpy(function, payload + cursor, funcSize);
+	func = new char[funcSize + 1];
+	func[funcSize] = '\0';
+	memcpy(func, payload + cursor, funcSize);
 	cursor += funcSize;
 	
 	// - Arg count
@@ -220,9 +226,7 @@ void IPCComm::ParseVoidFunctionPayload(char* payload)
 	cursor += 1;
 	
 	// - Args
-	std::vector<void*>* argv = new std::vector<void*>;
 	argv->reserve(argc);
-	std::vector<uint8_t>* argt = new std::vector<uint8_t>;
 	argt->reserve(argc);
 	for(unsigned int i = 0; i < argc; i++)
 	{
