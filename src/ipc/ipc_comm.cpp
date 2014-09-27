@@ -3,6 +3,8 @@
 #include "ipc_event.h"
 #include "ipc_server_man.h"
 
+#include "../cod4/callables.h"
+
 #include <string>
 #include <sys/un.h>
 #include <sys/socket.h>
@@ -114,15 +116,18 @@ void* IPCComm::ThreadedListener(void* ipcCommPtr)
 			payload = self->RecvChunk(self->clientSocket, payloadLen);
 			
 			// Prep variables to be modified by the parse
-			char* func                 = NULL;
+			char* func;
 			std::vector<void*>* argv   = new std::vector<void*>;
 			std::vector<uint8_t>* argt = new std::vector<uint8_t>;
 			
 			self->ParseVoidFunctionPayload(func, argv, argt, payload);
+			self->ExecVoidFunction(func, argv, argt);
 			
 			delete payload;
 		}
 	}
+	
+	printf("Rabbithole closed by remote\n");
 }
 
 /**
@@ -139,12 +144,18 @@ void* IPCComm::ThreadedSender(void* ipcCommPtr)
 		// The thread will only continue once the signal has been triggered
 		pthread_cond_wait(&self->sendSig, &self->sendLock);
 		
+		IPCServer::bcastEventStackLock.lock();
+		printf("Lock\n");
+		
 		// Compile and send each Event
 		IPCCoD4Event* event = NULL;
 		unsigned int s = IPCServer::broadcastEvents.size();
 		for(unsigned int i = 0; i < s; i++)
 		{
 			event = IPCServer::broadcastEvents.at(i);
+			
+			if(!event)
+				continue;
 			
 			// Compile and send
 			event->Compile();
@@ -159,6 +170,9 @@ void* IPCComm::ThreadedSender(void* ipcCommPtr)
 				IPCServer::DestroyEvent(event);
 		}
 		event = NULL;
+		
+		IPCServer::bcastEventStackLock.unlock();
+		printf("Unlock\n");
 	}
 
 	return NULL;
@@ -203,11 +217,20 @@ char* IPCComm::RecvChunk(int socket, u_int32_t chunkSize)
 	return payload;
 }
 
+void IPCComm::ExecVoidFunction(char* func, std::vector<void*>* argv, std::vector<uint8_t>* argt)
+{
+	if(strcmp(func, "BCASTCHAT") == 0)
+	{
+		printf("Executing function: %s\n", func);
+		Callables::BroadcastChat((char*) (*argv)[0]);
+	}
+}
+
 /*===============================================================*\
  * PARSERS
 \*===============================================================*/
 
-void IPCComm::ParseVoidFunctionPayload(char* func, std::vector<void*>* argv, std::vector<uint8_t>* argt, char* payload)
+void IPCComm::ParseVoidFunctionPayload(char*& func, std::vector<void*>* argv, std::vector<uint8_t>* argt, char* payload)
 {
 	unsigned int cursor = 0;
 	

@@ -9,7 +9,7 @@
 
 std::vector<IPCComm*>      IPCServer::clientComms;
 std::vector<IPCCoD4Event*> IPCServer::broadcastEvents;
-std::mutex                 IPCServer::bCastLock;
+std::mutex                 IPCServer::bcastEventStackLock;
 
 IPCServer::IPCServer(std::string path) {
 	// Initialize the client holder
@@ -109,7 +109,7 @@ void* IPCServer::ThreadedCommAllocator(void* serverPtr) {
 			}
 
 			// Get the full payload
-			payload = server->RecvPayload(clientSock, payloadLen);
+			payload = server->RecvChunk(clientSock, payloadLen);
 			
 			// General debugging
 			printf("Version: %i\n", version);
@@ -132,26 +132,26 @@ void* IPCServer::ThreadedCommAllocator(void* serverPtr) {
  * FUNCTIONS
 \*===============================================================*/
 
-char* IPCServer::RecvPayload(int socket, u_int32_t payloadSize)
+char* IPCServer::RecvChunk(int socket, u_int32_t chunkSize)
 {
 	// Make space for the payload, setting the last byte to 0x00 as if
 	// it was a C style string
-	char* payload = new char[payloadSize + 1];
-	memset(&payload[payloadSize], 0x00, 1);
+	char* payload = new char[chunkSize + 1];
+	memset(&payload[chunkSize], 0x00, 1);
 	
 	unsigned int curPos     = 0;
 	unsigned int currLen    = 0; // Amount of chars written to payload
 	unsigned int bufferSize = 8; // Recv 8 bytes every read
 	
-	while(curPos < payloadSize)
+	while(curPos < chunkSize)
 	{
-		currLen = payloadSize - curPos;
+		currLen = chunkSize - curPos;
 
 		// Set the recv size under certain circumstances
 		if(currLen < bufferSize)
 			bufferSize = currLen;
-		if(payloadSize < bufferSize)
-			bufferSize = payloadSize;
+		if(chunkSize < bufferSize)
+			bufferSize = chunkSize;
 
 		recv(socket, &payload[curPos], bufferSize, 0);
 		
@@ -221,7 +221,7 @@ unsigned int IPCServer::CreateNewComm()
 void IPCServer::SetEventForBroadcast(IPCCoD4Event* event)
 {
 	// Add the event to the broadcast events vector
-	IPCServer::bCastLock.lock();
+	IPCServer::bcastEventStackLock.lock();
 	
 	bool found = false;
 	unsigned int s = IPCServer::broadcastEvents.size();
@@ -239,8 +239,8 @@ void IPCServer::SetEventForBroadcast(IPCCoD4Event* event)
 	// If no free spot was found in the list then just push into the stack
 	if(!found)
 		IPCServer::broadcastEvents.push_back(event);
-
-	IPCServer::bCastLock.unlock();
+	
+	IPCServer::bcastEventStackLock.unlock();
 
 	// Signal all comm channels that an event has triggered
 	IPCComm* rabbitHole = NULL;
@@ -255,7 +255,7 @@ void IPCServer::SetEventForBroadcast(IPCCoD4Event* event)
 
 void IPCServer::DestroyEvent(IPCCoD4Event* event)
 {
-	IPCServer::bCastLock.lock();
+	//IPCServer::bcastEventStackLock.lock();
 
 	unsigned int s = IPCServer::broadcastEvents.size();
 	for(unsigned int i = 0; i < s; i++)
@@ -269,5 +269,5 @@ void IPCServer::DestroyEvent(IPCCoD4Event* event)
 		}	
 	}
 
-	IPCServer::bCastLock.unlock();
+	//IPCServer::bcastEventStackLock.unlock();
 }

@@ -4,12 +4,17 @@
 #include <stdint.h>
 
 class Callables {
+	// Virtual variable locations
+	static const unsigned long locMaxClients = 0x8370624; // Max clients allowed on the server
+	
 public:
 	Callables();
 	Callables(const Callables& orig);
 	virtual ~Callables();
 	
-	uint32_t GetPlayerIdByOffset(uint32_t offset);
+	static uint32_t GetPlayerIdByOffset(uint32_t offset);
+	static void BroadcastChat(char* message);
+	static uint32_t GetMaxClients();
 private:
 
 };

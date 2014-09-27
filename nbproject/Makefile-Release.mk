@@ -39,6 +39,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/cod4/controller.o \
 	${OBJECTDIR}/src/cod4/events.o \
 	${OBJECTDIR}/src/cod4/hook.o \
+	${OBJECTDIR}/src/cod4/player.o \
 	${OBJECTDIR}/src/globals.o \
 	${OBJECTDIR}/src/ipc/ipc_comm.o \
 	${OBJECTDIR}/src/ipc/ipc_event.o \
@@ -91,6 +92,11 @@ ${OBJECTDIR}/src/cod4/hook.o: src/cod4/hook.cpp
 	${MKDIR} -p ${OBJECTDIR}/src/cod4
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/cod4/hook.o src/cod4/hook.cpp
+
+${OBJECTDIR}/src/cod4/player.o: src/cod4/player.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/cod4
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/cod4/player.o src/cod4/player.cpp
 
 ${OBJECTDIR}/src/globals.o: src/globals.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src

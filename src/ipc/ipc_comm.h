@@ -68,7 +68,7 @@ public:
      * @param argt Vector of argument types (Init as 'new').
      * @param payload Payload to be parsed.
      */
-	void ParseVoidFunctionPayload(char* func, std::vector<void*>* argv, std::vector<uint8_t>* argt, char* payload);
+	void ParseVoidFunctionPayload(char*& func, std::vector<void*>* argv, std::vector<uint8_t>* argt, char* payload);
 	
 /*===============================================================*\
  * VARIABLES

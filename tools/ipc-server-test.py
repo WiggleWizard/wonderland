@@ -44,12 +44,12 @@ while True:
 	#print(list(bytearray(rx)))
 	#print(rx)
 
-	payload = struct.pack('>I', len("BCAST"))
-	payload += "BCAST"
+	payload = struct.pack('>I', len("BCASTCHAT"))
+	payload += "BCASTCHAT"
 	payload += "\x01"
 	payload += "\x03"
-	payload += struct.pack('>I', len("Testing packet recv with a BCAST'd chat"))
-	payload += "Testing packet recv with a BCAST'd chat"
+	payload += struct.pack('>I', len("Alice: Who...are...you?"))
+	payload += "Alice: Who...are...you?"
 
 	print(list(bytearray(payload)))
 

@@ -20,8 +20,6 @@ IPCCoD4Event::IPCCoD4Event(char* eventName)
 
 IPCCoD4Event::~IPCCoD4Event()
 {
-	printf("Deconstruction of event\n");
-	
 	// Free up memory
 	unsigned int args = this->argv.size();
 	for(unsigned int i = 0; i < args; i++)

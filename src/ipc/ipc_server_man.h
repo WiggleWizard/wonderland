@@ -53,11 +53,11 @@ public:
 \*===============================================================*/
 	
 	/**
-	 * Receives the full payload of the data.
+	 * Recvs data up to chunkSize amount.
 	 * 
      * @return Payload
      */
-	char* RecvPayload(int socket, u_int32_t payloadSize);
+	char* RecvChunk(int socket, u_int32_t chunkSize);
 
 	/**
 	 * Flushes the socket to get rid of excess data in the packet to
@@ -90,6 +90,8 @@ public:
 
 	/**
 	 * Removes the specified event from the broadcasting stack.
+	 * WARN: This is NOT thread safe, to make thread safe wrap
+	 * in a lock (IPCServer::bcastEventStackLock).
 	 * 
      * @param event
      */
@@ -106,13 +108,15 @@ public:
 	// all connected clients.
 	static std::vector<IPCCoD4Event*> broadcastEvents;
 	
+	static std::mutex bcastEventStackLock; // TODO: Refactor to name: bcastEventStackLock
+	
 private:
 	pthread_t listener;
 	
 	std::string clientCommPrefix;
 	std::string clientCommPath;
 
-	static std::mutex bCastLock; // TODO: Refactor to name: bcastEventStackLock
+	
 	
 	
 };
