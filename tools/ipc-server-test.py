@@ -3,6 +3,8 @@ import sys
 import struct
 import time
 
+from EventParser import *
+
 # Create a UDS socket
 sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 
@@ -41,8 +43,9 @@ print("Rabbithole connection successful")
 
 while True:
 	rx = rabbithole.recv(512)
-	#print(list(bytearray(rx)))
-	#print(rx)
+	
+	eventParser = EventParser()
+	
 
 	payload = struct.pack('>I', len("BCASTCHAT"))
 	payload += "BCASTCHAT"

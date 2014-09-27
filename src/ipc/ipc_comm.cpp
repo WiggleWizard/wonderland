@@ -120,10 +120,23 @@ void* IPCComm::ThreadedListener(void* ipcCommPtr)
 			std::vector<void*>* argv   = new std::vector<void*>;
 			std::vector<uint8_t>* argt = new std::vector<uint8_t>;
 			
+			// Parse then attempt to execute the received data as some sort
+			// of function/void.
 			self->ParseVoidFunctionPayload(func, argv, argt, payload);
 			self->ExecVoidFunction(func, argv, argt);
 			
-			delete payload;
+			// Free memory
+			delete [] payload;
+			delete [] func;
+			
+			unsigned int args = argv->size();
+			for(unsigned int i = 0; i < args; i++)
+			{
+				if((*argt)[i] == IPCTypes::ch)
+					delete [] (char*) (*argv)[i];
+			}
+			delete argv;
+			delete argt;
 		}
 	}
 	
@@ -145,7 +158,6 @@ void* IPCComm::ThreadedSender(void* ipcCommPtr)
 		pthread_cond_wait(&self->sendSig, &self->sendLock);
 		
 		IPCServer::bcastEventStackLock.lock();
-		printf("Lock\n");
 		
 		// Compile and send each Event
 		IPCCoD4Event* event = NULL;
@@ -172,7 +184,6 @@ void* IPCComm::ThreadedSender(void* ipcCommPtr)
 		event = NULL;
 		
 		IPCServer::bcastEventStackLock.unlock();
-		printf("Unlock\n");
 	}
 
 	return NULL;
