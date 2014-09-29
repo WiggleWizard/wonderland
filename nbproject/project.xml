@@ -10,9 +10,6 @@
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
-                <sourceRootElem>/home/zinglish/Projects/project-alice/alice/src</sourceRootElem>
-                <sourceRootElem>src</sourceRootElem>
-                <sourceRootElem>/home/zinglish/Projects/project-alice/alice/src</sourceRootElem>
                 <sourceRootElem>src</sourceRootElem>
             </sourceRootList>
             <confList>

@@ -6,6 +6,8 @@
 #include "../ipc/ipc_event.h"
 #include "../ipc/ipc_server_man.h"
 
+#include "player.h"
+
 Hook* Events::hPlayerSay;
 
 Events::Events() {}
@@ -35,6 +37,12 @@ int Events::HPlayerSay(unsigned int* playerId, int a2, int teamSay, char* messag
 	// Prepare the arguments and types for the event
 	int* argTeamSay = new int;
 	*argTeamSay = teamSay;
+	
+	Player player(*playerId);
+	unsigned int playerNameLen = strlen(player.GetName());
+	char* playerName = new char[playerNameLen + 1];
+	memcpy(playerName, player.GetName(), playerNameLen);
+	playerName[playerNameLen] = '\0';
 
 	unsigned int messageLen = strlen(message);
 	char* argMessage = new char[messageLen + 1];
@@ -45,9 +53,9 @@ int Events::HPlayerSay(unsigned int* playerId, int a2, int teamSay, char* messag
 	char* cmd = new char[4 + 1];
 	strcpy(cmd, "CHAT");
 	IPCCoD4Event* ipcEvent = new IPCCoD4Event(cmd);
-	ipcEvent->AddArgument((void*) 5, IPCTypes::uint);
+	ipcEvent->AddArgument((void*) *playerId, IPCTypes::uint);
+	ipcEvent->AddArgument((void*) playerName, IPCTypes::ch);
 	ipcEvent->AddArgument((void*) argMessage, IPCTypes::ch);
-	
 
 	// Broadcast the event
 	IPCServer::SetEventForBroadcast(ipcEvent);
