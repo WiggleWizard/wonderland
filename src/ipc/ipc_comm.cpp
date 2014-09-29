@@ -20,8 +20,20 @@ IPCComm::IPCComm(unsigned int commId, std::string path, std::string prefix) {
 	this->sendLock = PTHREAD_MUTEX_INITIALIZER;
 	this->sendSig  = PTHREAD_COND_INITIALIZER;
 	
+	// Create the listening thread
+	pthread_create(&this->constructor, NULL, IPCComm::ThreadedConstructor, this);
+}
+
+IPCComm::~IPCComm() {}
+
+/*===============================================================*\
+ * THREADS
+\*===============================================================*/
+
+void* IPCComm::ThreadedConstructor(void* ipcCommPtr)
+{
+	IPCComm* self = (IPCComm*) ipcCommPtr;
 	
-	// Start construction of the rabbit hole
 	int localSock;
 	struct sockaddr_un local;
 
@@ -34,7 +46,7 @@ IPCComm::IPCComm(unsigned int commId, std::string path, std::string prefix) {
 	
 	// Prepare and bind the socket
 	local.sun_family = AF_UNIX;
-	std::string commPath = this->GetPath();
+	std::string commPath = self->GetPath();
 	commPath.copy(local.sun_path, commPath.length(), 0);
 	unlink(local.sun_path); // Delete the original socket
 	unsigned int len = strlen(local.sun_path) + sizeof(local.sun_family);
@@ -52,34 +64,28 @@ IPCComm::IPCComm(unsigned int commId, std::string path, std::string prefix) {
 		exit(1);
 	}
 	
-	printf("Rabbit hole %i initialized\n", this->commId);
+	printf("Rabbit hole %i initialized, awaiting connection\n", self->commId);
 		
 	struct sockaddr_un remote;
 	unsigned int clientSockSize = sizeof(remote);
 
 	// Accept the first connection request
-	if((this->clientSocket = accept(localSock, (struct sockaddr *)&remote, &clientSockSize)) == -1)
+	if((self->clientSocket = accept(localSock, (struct sockaddr *)&remote, &clientSockSize)) == -1)
 	{
 		printf("Accept failed, error: %i\n", errno);
 		exit(1);
 	}
 	
-	printf("Rabbit hole %i connection made\n", this->commId);
+	printf("Rabbit hole %i connection made\n", self->commId);
 	
-	this->active = true;
+	self->active = true;
 	
 	// Create the listening thread
-	pthread_create(&this->listener, NULL, IPCComm::ThreadedListener, this);
+	pthread_create(&self->listener, NULL, IPCComm::ThreadedListener, self);
 	
 	// Create the sending thread
-	pthread_create(&this->sender, NULL, &IPCComm::ThreadedSender, this);
+	pthread_create(&self->sender, NULL, &IPCComm::ThreadedSender, self);
 }
-
-IPCComm::~IPCComm() {}
-
-/*===============================================================*\
- * THREADS
-\*===============================================================*/
 
 void* IPCComm::ThreadedListener(void* ipcCommPtr)
 {
