@@ -9,6 +9,7 @@
 #include "player.h"
 
 Hook* Events::hPlayerSay;
+Hook* Events::hPlayerChangeName;
 
 Events::Events() {}
 Events::Events(const Events& orig) {}
@@ -16,7 +17,8 @@ Events::~Events() {}
 
 void Events::InsertHooks()
 {
-	Events::hPlayerSay = new Hook((void*) Events::locPlayerSay, 5, (void*) Events::HPlayerSay);
+	Events::hPlayerSay        = new Hook((void*) Events::locPlayerSay, 5, (void*) Events::HPlayerSay);
+	Events::hPlayerChangeName = new Hook((void*) Events::locPlayerNameChange, 5, (void*) Events::HPlayerNameChange);
 }
 
 /*===============================================================*\
@@ -35,8 +37,8 @@ void Events::InsertHooks()
 int Events::HPlayerSay(unsigned int* playerId, int a2, int teamSay, char* message)
 {
 	// Prepare the arguments and types for the event
-	int* argTeamSay = new int;
-	*argTeamSay = teamSay;
+	//int* argTeamSay = new int;
+	//*argTeamSay = teamSay;
 	
 	Player player(*playerId);
 	unsigned int playerNameLen = strlen(player.GetName());
@@ -56,11 +58,34 @@ int Events::HPlayerSay(unsigned int* playerId, int a2, int teamSay, char* messag
 	ipcEvent->AddArgument((void*) *playerId, IPCTypes::uint);
 	ipcEvent->AddArgument((void*) playerName, IPCTypes::ch);
 	ipcEvent->AddArgument((void*) argMessage, IPCTypes::ch);
+	
+	printf("%s: %s\n", playerName, message);
 
 	// Broadcast the event
 	IPCServer::SetEventForBroadcast(ipcEvent);
-	
-	printf("[%i]: %s\n", *playerId, message);
 
+	return 0;
+}
+
+int Events::HPlayerNameChange(unsigned int playerOffset)
+{
+	unsigned int playerId = Callables::GetPlayerIdByOffset(playerOffset);
+	char* newNameRtn = Callables::GetValueFromSlashString((char*)(0x0887C320 + 9), "name");
+	
+	// Copy the name into a new char
+	unsigned int newNameLen = strlen(newNameRtn);
+	char* newName = new char[newNameLen + 1];
+	memcpy(newName, newNameRtn, newNameLen);
+	newName[newNameLen] = '\0';
+	
+	char* cmd = new char[10 + 1];
+	strcpy(cmd, "CHANGENAME");
+	IPCCoD4Event* ipcEvent = new IPCCoD4Event(cmd);
+	ipcEvent->AddArgument((void*) playerId, IPCTypes::uint);
+	ipcEvent->AddArgument((void*) newName, IPCTypes::ch);
+	
+	// Broadcast the event
+	IPCServer::SetEventForBroadcast(ipcEvent);
+	
 	return 0;
 }

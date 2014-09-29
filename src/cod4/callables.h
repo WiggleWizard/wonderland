@@ -4,8 +4,14 @@
 #include <stdint.h>
 
 class Callables {
+	// Virtual function locations
+	static const unsigned long locfuncGetValueFromSlashString = 0x081AAB50;
+	
 	// Virtual variable locations
 	static const unsigned long locMaxClients = 0x8370624; // Max clients allowed on the server
+	
+	// Type definitions
+	typedef char* (*funcdefGetValueFromSlashString)(char* slashedString, char* key);
 	
 public:
 	Callables();
@@ -15,6 +21,7 @@ public:
 	static uint32_t GetPlayerIdByOffset(uint32_t offset);
 	static void BroadcastChat(char* message);
 	static uint32_t GetMaxClients();
+	static char* GetValueFromSlashString(char* slashedString, char* key);
 private:
 
 };

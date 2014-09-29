@@ -35,3 +35,8 @@ uint32_t Callables::GetMaxClients()
 {
 	return *(uint32_t*) locMaxClients;
 }
+
+char* Callables::GetValueFromSlashString(char* slashedString, char* key)
+{
+	return ((funcdefGetValueFromSlashString)locfuncGetValueFromSlashString)(slashedString, key);
+}
