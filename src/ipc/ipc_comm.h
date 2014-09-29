@@ -74,8 +74,6 @@ public:
  * VARIABLES
 \*===============================================================*/
 	
-	
-	
 private:
 	pthread_t constructor;
 	pthread_t listener;
@@ -89,6 +87,7 @@ private:
 	std::string  prefix;
 	
 	int clientSocket;
+	bool active;
 	
 	std::vector<IPCCoD4Event*> sendQueue;
 };

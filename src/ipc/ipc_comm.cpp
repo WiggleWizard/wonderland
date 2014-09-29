@@ -20,20 +20,8 @@ IPCComm::IPCComm(unsigned int commId, std::string path, std::string prefix) {
 	this->sendLock = PTHREAD_MUTEX_INITIALIZER;
 	this->sendSig  = PTHREAD_COND_INITIALIZER;
 	
-	// Create the listening thread
-	pthread_create(&this->constructor, NULL, IPCComm::ThreadedConstructor, this);
-}
-
-IPCComm::~IPCComm() {}
-
-/*===============================================================*\
- * THREADS
-\*===============================================================*/
-
-void* IPCComm::ThreadedConstructor(void* ipcCommPtr)
-{
-	IPCComm* self = (IPCComm*) ipcCommPtr;
 	
+	// Start construction of the rabbit hole
 	int localSock;
 	struct sockaddr_un local;
 
@@ -46,7 +34,7 @@ void* IPCComm::ThreadedConstructor(void* ipcCommPtr)
 	
 	// Prepare and bind the socket
 	local.sun_family = AF_UNIX;
-	std::string commPath = self->GetPath();
+	std::string commPath = this->GetPath();
 	commPath.copy(local.sun_path, commPath.length(), 0);
 	unlink(local.sun_path); // Delete the original socket
 	unsigned int len = strlen(local.sun_path) + sizeof(local.sun_family);
@@ -64,26 +52,34 @@ void* IPCComm::ThreadedConstructor(void* ipcCommPtr)
 		exit(1);
 	}
 	
-	printf("Rabbit hole %i initialized\n", self->commId);
+	printf("Rabbit hole %i initialized\n", this->commId);
 		
 	struct sockaddr_un remote;
 	unsigned int clientSockSize = sizeof(remote);
 
 	// Accept the first connection request
-	if((self->clientSocket = accept(localSock, (struct sockaddr *)&remote, &clientSockSize)) == -1)
+	if((this->clientSocket = accept(localSock, (struct sockaddr *)&remote, &clientSockSize)) == -1)
 	{
 		printf("Accept failed, error: %i\n", errno);
 		exit(1);
 	}
 	
-	printf("Rabbit hole %i connection made\n", self->commId);
+	printf("Rabbit hole %i connection made\n", this->commId);
+	
+	this->active = true;
 	
 	// Create the listening thread
-	pthread_create(&self->listener, NULL, IPCComm::ThreadedListener, self);
+	pthread_create(&this->listener, NULL, IPCComm::ThreadedListener, this);
 	
 	// Create the sending thread
-	pthread_create(&self->sender, NULL, &IPCComm::ThreadedSender, self);
+	pthread_create(&this->sender, NULL, &IPCComm::ThreadedSender, this);
 }
+
+IPCComm::~IPCComm() {}
+
+/*===============================================================*\
+ * THREADS
+\*===============================================================*/
 
 void* IPCComm::ThreadedListener(void* ipcCommPtr)
 {
@@ -141,6 +137,8 @@ void* IPCComm::ThreadedListener(void* ipcCommPtr)
 	}
 	
 	printf("Rabbithole closed by remote\n");
+	
+	self->active = false;
 }
 
 /**
@@ -156,6 +154,9 @@ void* IPCComm::ThreadedSender(void* ipcCommPtr)
 	{
 		// The thread will only continue once the signal has been triggered
 		pthread_cond_wait(&self->sendSig, &self->sendLock);
+		
+		if(self->clientSocket == NULL)
+			break;
 		
 		IPCServer::bcastEventStackLock.lock();
 		
