@@ -10,6 +10,7 @@
 
 Hook* Events::hPlayerSay;
 Hook* Events::hPlayerChangeName;
+Hook* Events::hServerStatusRequest;
 
 Events::Events() {}
 Events::Events(const Events& orig) {}
@@ -17,8 +18,9 @@ Events::~Events() {}
 
 void Events::InsertHooks()
 {
-	Events::hPlayerSay        = new Hook((void*) Events::locPlayerSay, 5, (void*) Events::HPlayerSay);
-	Events::hPlayerChangeName = new Hook((void*) Events::locPlayerNameChange, 5, (void*) Events::HPlayerNameChange);
+	Events::hPlayerSay           = new Hook((void*) Events::locPlayerSay, 5, (void*) Events::HPlayerSay);
+	Events::hPlayerChangeName    = new Hook((void*) Events::locPlayerNameChange, 5, (void*) Events::HPlayerNameChange);
+	Events::hServerStatusRequest = new Hook((void*) Events::locRconStatus, 5, (void*) Events::HServerStatusRequest);
 }
 
 /*===============================================================*\
@@ -83,6 +85,18 @@ int Events::HPlayerNameChange(unsigned int playerOffset)
 	IPCCoD4Event* ipcEvent = new IPCCoD4Event(cmd);
 	ipcEvent->AddArgument((void*) playerId, IPCTypes::uint);
 	ipcEvent->AddArgument((void*) newName, IPCTypes::ch);
+	
+	// Broadcast the event
+	IPCServer::SetEventForBroadcast(ipcEvent);
+	
+	return 0;
+}
+
+int Events::HServerStatusRequest()
+{
+	char* cmd = new char[9 + 1];
+	strcpy(cmd, "STATUSREQ");
+	IPCCoD4Event* ipcEvent = new IPCCoD4Event(cmd);
 	
 	// Broadcast the event
 	IPCServer::SetEventForBroadcast(ipcEvent);
