@@ -7,19 +7,23 @@
 #include <unistd.h>
 #include <netinet/in.h>
 
-std::vector<IPCComm*>      IPCServer::clientComms;
+std::vector<IPCComm*>      IPCServer::rabbitHoles;
 std::vector<IPCCoD4Event*> IPCServer::broadcastEvents;
 std::mutex                 IPCServer::bcastEventStackLock;
 
-IPCServer::IPCServer(std::string path) {
+IPCServer::IPCServer(char* wid) {
 	// Initialize the client holder
-	this->clientComms.reserve(5);
+	this->rabbitHoles.reserve(5);
 
 	// Allocate some memory for the broadcastEvents stack
 	IPCServer::broadcastEvents.reserve(20);
 	
-	this->clientCommPrefix = "rabbithole-";
-	this->clientCommPath   = "/tmp/";
+	this->wid = wid;
+	
+	this->rabbitHolePrefix = "rabbithole-";
+	this->rabbitHolePrefix += wid;
+	this->rabbitHolePrefix += "-";
+	this->rabbitHolePath   = "/tmp/";
 	
 	// Create the management thread
 	pthread_create(&this->listener, NULL, &IPCServer::ThreadedCommAllocator, this);
@@ -50,7 +54,9 @@ void* IPCServer::ThreadedCommAllocator(void* serverPtr) {
 	
 	// Prepare and bind the socket
 	local.sun_family = AF_UNIX;
-	strcpy(local.sun_path, "/tmp/wonderland");
+	strcpy(local.sun_path, "/tmp/wonderland-");
+	memcpy(&(local.sun_path[16]), server->wid, strlen(server->wid) + 1);
+	printf("Preparing path %s\n", local.sun_path);
 	unlink(local.sun_path); // Delete the original socket
 	unsigned int len = strlen(local.sun_path) + sizeof(local.sun_family);
 	
@@ -171,7 +177,7 @@ void IPCServer::ResponseHandler(int socket, char* pkt)
 		// Prepare the full path to the rabbit hole
 		unsigned int commId = this->CreateNewComm();
 		
-		std::string fullCommPath = clientComms.at(commId)->GetPath();
+		std::string fullCommPath = rabbitHoles.at(commId)->GetPath();
 		payload = new char[fullCommPath.length() + 1];
 		
 		fullCommPath.copy(payload, fullCommPath.length(), 0);
@@ -210,10 +216,10 @@ void IPCServer::ResponseHandler(int socket, char* pkt)
 unsigned int IPCServer::CreateNewComm()
 {
 	// Prepare args for creating a new comm
-	unsigned int commId = this->clientComms.size();
+	unsigned int commId = this->rabbitHoles.size();
 	
 	// Create a new comm and push it into the array
-	this->clientComms.push_back(new IPCComm(commId, this->clientCommPath, this->clientCommPrefix));
+	this->rabbitHoles.push_back(new IPCComm(commId, this->rabbitHolePath, this->rabbitHolePrefix));
 	
 	return commId;
 }
@@ -244,11 +250,17 @@ void IPCServer::SetEventForBroadcast(IPCCoD4Event* event)
 
 	// Signal all comm channels that an event has triggered
 	IPCComm* rabbitHole = NULL;
-	s = IPCServer::clientComms.size();
+	s = IPCServer::rabbitHoles.size();
 	for(unsigned int i = 0; i < s; i++)
 	{
-		rabbitHole = IPCServer::clientComms[i];
-		rabbitHole->SignalSend();
+		rabbitHole = IPCServer::rabbitHoles[i];
+		
+		// Guard against signalling a rabbit hole that has actually disconnected
+		// or doesn't have a client connected at all.
+		if(rabbitHole->IsActive())
+		{
+			rabbitHole->SignalSend();
+		}
 	}
 	rabbitHole = NULL;
 }

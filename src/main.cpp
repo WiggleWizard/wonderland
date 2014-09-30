@@ -1,3 +1,5 @@
+#include <cstring>
+
 #include "ipc/ipc_server_man.h"
 #include "cod4/events.h"
 
@@ -8,8 +10,32 @@
 void  __attribute__((constructor)) init (int argc, char** argv)
 {
 	printf(BANNER);
+	
+	// Declare the Wonderland identifier for later use
+	char* wid = NULL;
+	
+	// Get args from the command line
+	for(int i = 0; i < argc; i++)
+	{
+		if(strcmp(argv[i], "-wid") == 0)
+		{
+			printf("Using Wonderland identifier: %s\n", argv[i + 1]);
+			
+			unsigned int argvLen = strlen(argv[i + 1]);
+			wid = new char[argvLen];
+			memcpy(wid, argv[i + 1], argvLen);
+			wid[argvLen] = '\0';
+		}
+	}
+	
+	if(wid == NULL)
+	{
+		printf("You must specify a Wonderland identifier by using '-wid' as a switch in your CLI\n");
+		exit(0);
+	}
+	
 	// Init the server manager
-	IPCServer* serverMan = new IPCServer("Test");
+	IPCServer* serverMan = new IPCServer(wid);
 	
 	// Init the hooks into the server
 	Events::InsertHooks();

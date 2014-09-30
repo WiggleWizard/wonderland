@@ -54,6 +54,7 @@ public:
 \*===============================================================*/
 	
 	std::string GetPath();
+	bool IsActive();
 	
 /*===============================================================*\
  * PARSERS
@@ -87,6 +88,7 @@ private:
 	std::string  prefix;
 	
 	int clientSocket;
+	int listenSocket;
 	bool active;
 	
 	std::vector<IPCCoD4Event*> sendQueue;

@@ -20,6 +20,36 @@ IPCComm::IPCComm(unsigned int commId, std::string path, std::string prefix) {
 	this->sendLock = PTHREAD_MUTEX_INITIALIZER;
 	this->sendSig  = PTHREAD_COND_INITIALIZER;
 	
+	// Construct the socket, then in another thread await a connection
+	struct sockaddr_un local;
+
+	// Create the socket
+	if((this->listenSocket = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
+	{
+		printf("Socket creation failed, error: %i\n", errno);
+		exit(1);
+	}
+	
+	// Prepare and bind the socket
+	local.sun_family = AF_UNIX;
+	std::string commPath = this->GetPath();
+	commPath.copy(local.sun_path, commPath.length(), 0);
+	unlink(local.sun_path); // Delete the original socket
+	unsigned int len = strlen(local.sun_path) + sizeof(local.sun_family);
+	
+	if(bind(this->listenSocket, (struct sockaddr *)&local, len) == -1)
+	{
+		printf("Binding failed, error: %i\n", errno);
+		exit(1);
+	}
+
+	// Start listening
+	if(listen(this->listenSocket, 5) == -1)
+	{
+		printf("Listen failed, error: %i\n", errno);
+		exit(1);
+	}
+	
 	// Create the listening thread
 	pthread_create(&this->constructor, NULL, IPCComm::ThreadedConstructor, this);
 }
@@ -34,43 +64,13 @@ void* IPCComm::ThreadedConstructor(void* ipcCommPtr)
 {
 	IPCComm* self = (IPCComm*) ipcCommPtr;
 	
-	int localSock;
-	struct sockaddr_un local;
-
-	// Create the socket
-	if((localSock = socket(AF_UNIX, SOCK_STREAM, 0)) == -1)
-	{
-		printf("Socket creation failed, error: %i\n", errno);
-		exit(1);
-	}
-	
-	// Prepare and bind the socket
-	local.sun_family = AF_UNIX;
-	std::string commPath = self->GetPath();
-	commPath.copy(local.sun_path, commPath.length(), 0);
-	unlink(local.sun_path); // Delete the original socket
-	unsigned int len = strlen(local.sun_path) + sizeof(local.sun_family);
-	
-	if(bind(localSock, (struct sockaddr *)&local, len) == -1)
-	{
-		printf("Binding failed, error: %i\n", errno);
-		exit(1);
-	}
-
-	// Start listening
-	if(listen(localSock, 5) == -1)
-	{
-		printf("Listen failed, error: %i\n", errno);
-		exit(1);
-	}
-	
 	printf("Rabbit hole %i initialized, awaiting connection\n", self->commId);
 		
 	struct sockaddr_un remote;
 	unsigned int clientSockSize = sizeof(remote);
 
 	// Accept the first connection request
-	if((self->clientSocket = accept(localSock, (struct sockaddr *)&remote, &clientSockSize)) == -1)
+	if((self->clientSocket = accept(self->listenSocket, (struct sockaddr *)&remote, &clientSockSize)) == -1)
 	{
 		printf("Accept failed, error: %i\n", errno);
 		exit(1);
@@ -142,7 +142,7 @@ void* IPCComm::ThreadedListener(void* ipcCommPtr)
 		}
 	}
 	
-	printf("Rabbithole closed by remote\n");
+	printf("Rabbit hole closed by remote\n");
 	
 	self->active = false;
 }
@@ -162,7 +162,7 @@ void* IPCComm::ThreadedSender(void* ipcCommPtr)
 		pthread_cond_wait(&self->sendSig, &self->sendLock);
 		
 		if(self->clientSocket == NULL)
-			break;
+			printf("NULL\n");
 		
 		IPCServer::bcastEventStackLock.lock();
 		
@@ -185,7 +185,7 @@ void* IPCComm::ThreadedSender(void* ipcCommPtr)
 
 			// Double checks the sent counter, if it's equal to the same
 			// amount of clients running then it's disposed of
-			if(event->SentTimes() >= IPCServer::clientComms.size())
+			if(event->SentTimes() >= IPCServer::rabbitHoles.size())
 				IPCServer::DestroyEvent(event);
 		}
 		event = NULL;
@@ -312,4 +312,9 @@ void IPCComm::ParseVoidFunctionPayload(char*& func, std::vector<void*>* argv, st
 
 std::string IPCComm::GetPath() {
 	return std::string(this->path) + std::string(this->prefix) + std::to_string(this->commId);
+}
+
+bool IPCComm::IsActive()
+{
+	return this->active;
 }

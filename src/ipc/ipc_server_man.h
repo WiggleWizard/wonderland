@@ -21,9 +21,9 @@ public:
 	/**
 	 * Constructs a listener UNIX socket at `path` and starts a new thread.
 	 * 
-     * @param path UNIX socket path.
+     * @param wid .
      */
-	IPCServer(std::string path);
+	IPCServer(char* wid);
 	
 	IPCServer(const IPCServer& orig);
 	virtual ~IPCServer();
@@ -102,7 +102,7 @@ public:
 \*===============================================================*/
 	
 	// Tracks client comms
-	static std::vector<IPCComm*> clientComms;
+	static std::vector<IPCComm*> rabbitHoles;
 
 	// Holds event type packets which should be broadcasted across
 	// all connected clients.
@@ -113,12 +113,10 @@ public:
 private:
 	pthread_t listener;
 	
-	std::string clientCommPrefix;
-	std::string clientCommPath;
+	std::string rabbitHolePrefix;
+	std::string rabbitHolePath;
 
-	
-	
-	
+	char* wid;
 };
 
 #endif	/* SERVER_H */
