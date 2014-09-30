@@ -237,10 +237,15 @@ char* IPCComm::RecvChunk(int socket, u_int32_t chunkSize)
 
 void IPCComm::ExecVoidFunction(char* func, std::vector<void*>* argv, std::vector<uint8_t>* argt)
 {
+	printf("Executing void function: %s\n", func);
+	
 	if(strcmp(func, "BCASTCHAT") == 0)
 	{
-		printf("Executing function: %s\n", func);
 		Callables::BroadcastChat((char*) (*argv)[0]);
+	}
+	else if(strcmp(func, "SETPLAYERNAME") == 0)
+	{
+		Callables::SetPlayerName(*(unsigned int*) (*argv)[0], (char*) (*argv)[1]);
 	}
 }
 
@@ -311,7 +316,7 @@ void IPCComm::ParseVoidFunctionPayload(char*& func, std::vector<void*>* argv, st
 \*===============================================================*/
 
 std::string IPCComm::GetPath() {
-	return std::string(this->path) + std::string(this->prefix) + std::to_string(this->commId);
+	return std::string(this->path) + std::string(this->prefix) + std::to_string(this->commId) + '\0';
 }
 
 bool IPCComm::IsActive()

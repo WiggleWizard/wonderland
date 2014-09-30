@@ -40,3 +40,9 @@ char* Callables::GetValueFromSlashString(char* slashedString, char* key)
 {
 	return ((funcdefGetValueFromSlashString)locfuncGetValueFromSlashString)(slashedString, key);
 }
+
+void Callables::SetPlayerName(unsigned int playerId, char* name)
+{
+	Player player(playerId);
+	player.SetName(name);
+}

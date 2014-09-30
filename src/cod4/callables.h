@@ -12,6 +12,7 @@ class Callables {
 	
 	// Type definitions
 	typedef char* (*funcdefGetValueFromSlashString)(char* slashedString, char* key);
+	typedef unsigned int (*funcdefPlayerForceName)(unsigned long playerId);
 	
 public:
 	Callables();
@@ -22,6 +23,7 @@ public:
 	static void BroadcastChat(char* message);
 	static uint32_t GetMaxClients();
 	static char* GetValueFromSlashString(char* slashedString, char* key);
+	static void SetPlayerName(unsigned int playerId, char* name);
 private:
 
 };

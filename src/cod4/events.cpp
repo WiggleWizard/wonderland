@@ -86,6 +86,8 @@ int Events::HPlayerNameChange(unsigned int playerOffset)
 	ipcEvent->AddArgument((void*) playerId, IPCTypes::uint);
 	ipcEvent->AddArgument((void*) newName, IPCTypes::ch);
 	
+	printf("Change name event triggered\n");
+	
 	// Broadcast the event
 	IPCServer::SetEventForBroadcast(ipcEvent);
 	
