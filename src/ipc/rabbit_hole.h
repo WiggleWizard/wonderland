@@ -71,6 +71,8 @@ public:
      */
 	void ParseVoidFunctionPayload(char*& func, std::vector<void*>* argv, std::vector<uint8_t>* argt, char* payload);
 	
+	
+	
 /*===============================================================*\
  * VARIABLES
 \*===============================================================*/

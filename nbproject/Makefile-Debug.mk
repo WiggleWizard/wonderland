@@ -42,6 +42,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/cod4/player.o \
 	${OBJECTDIR}/src/globals.o \
 	${OBJECTDIR}/src/ipc/ipc_event.o \
+	${OBJECTDIR}/src/ipc/ipc_return_function.o \
 	${OBJECTDIR}/src/ipc/ipc_rx_func_pkt.o \
 	${OBJECTDIR}/src/ipc/ipc_server_man.o \
 	${OBJECTDIR}/src/ipc/rabbit_hole.o \
@@ -50,7 +51,7 @@ OBJECTFILES= \
 
 
 # C Compiler Flags
-CFLAGS=
+CFLAGS=-m32
 
 # CC Compiler Flags
 CCFLAGS=-m32 -Wall -fexceptions -fPIC -O0 -J3
@@ -60,7 +61,7 @@ CXXFLAGS=-m32 -Wall -fexceptions -fPIC -O0 -J3
 FFLAGS=
 
 # Assembler Flags
-ASFLAGS=
+ASFLAGS=--32
 
 # Link Libraries and Options
 LDLIBSOPTIONS=
@@ -107,6 +108,11 @@ ${OBJECTDIR}/src/ipc/ipc_event.o: src/ipc/ipc_event.cpp
 	${MKDIR} -p ${OBJECTDIR}/src/ipc
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -std=c++11 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ipc/ipc_event.o src/ipc/ipc_event.cpp
+
+${OBJECTDIR}/src/ipc/ipc_return_function.o: src/ipc/ipc_return_function.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/ipc
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++11 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ipc/ipc_return_function.o src/ipc/ipc_return_function.cpp
 
 ${OBJECTDIR}/src/ipc/ipc_rx_func_pkt.o: src/ipc/ipc_rx_func_pkt.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src/ipc

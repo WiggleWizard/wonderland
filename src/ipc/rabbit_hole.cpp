@@ -62,7 +62,7 @@ RabbitHole::~RabbitHole() {}
 
 void* RabbitHole::ThreadedConstructor(void* ipcCommPtr)
 {
-	IPCComm* self = (RabbitHole*) ipcCommPtr;
+	RabbitHole* self = (RabbitHole*) ipcCommPtr;
 	
 	printf("Rabbit hole %i initialized, awaiting connection\n", self->commId);
 		
@@ -89,7 +89,7 @@ void* RabbitHole::ThreadedConstructor(void* ipcCommPtr)
 
 void* RabbitHole::ThreadedListener(void* ipcCommPtr)
 {
-	IPCComm* self = (RabbitHole*) ipcCommPtr;
+	RabbitHole* self = (RabbitHole*) ipcCommPtr;
 	
 	while(true)
 	{
@@ -154,7 +154,7 @@ void* RabbitHole::ThreadedListener(void* ipcCommPtr)
  */
 void* RabbitHole::ThreadedSender(void* ipcCommPtr)
 {
-	IPCComm* self = (RabbitHole*) ipcCommPtr;
+	RabbitHole* self = (RabbitHole*) ipcCommPtr;
 	
 	while(true)
 	{
