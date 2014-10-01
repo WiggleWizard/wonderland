@@ -13,7 +13,7 @@
 
 #include "ipc_event.h"
 
-class IPCComm;
+class RabbitHole;
 class IPCCoD4Event;
 
 class IPCServer {
@@ -102,7 +102,7 @@ public:
 \*===============================================================*/
 	
 	// Tracks client comms
-	static std::vector<IPCComm*> rabbitHoles;
+	static std::vector<RabbitHole*> rabbitHoles;
 
 	// Holds event type packets which should be broadcasted across
 	// all connected clients.

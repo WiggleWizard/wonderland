@@ -41,10 +41,10 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/cod4/hook.o \
 	${OBJECTDIR}/src/cod4/player.o \
 	${OBJECTDIR}/src/globals.o \
-	${OBJECTDIR}/src/ipc/ipc_comm.o \
 	${OBJECTDIR}/src/ipc/ipc_event.o \
 	${OBJECTDIR}/src/ipc/ipc_rx_func_pkt.o \
 	${OBJECTDIR}/src/ipc/ipc_server_man.o \
+	${OBJECTDIR}/src/ipc/rabbit_hole.o \
 	${OBJECTDIR}/src/logger.o \
 	${OBJECTDIR}/src/main.o
 
@@ -103,11 +103,6 @@ ${OBJECTDIR}/src/globals.o: src/globals.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -std=c++11 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/globals.o src/globals.cpp
 
-${OBJECTDIR}/src/ipc/ipc_comm.o: src/ipc/ipc_comm.cpp 
-	${MKDIR} -p ${OBJECTDIR}/src/ipc
-	${RM} "$@.d"
-	$(COMPILE.cc) -g -std=c++11 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ipc/ipc_comm.o src/ipc/ipc_comm.cpp
-
 ${OBJECTDIR}/src/ipc/ipc_event.o: src/ipc/ipc_event.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src/ipc
 	${RM} "$@.d"
@@ -122,6 +117,11 @@ ${OBJECTDIR}/src/ipc/ipc_server_man.o: src/ipc/ipc_server_man.cpp
 	${MKDIR} -p ${OBJECTDIR}/src/ipc
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -std=c++11 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ipc/ipc_server_man.o src/ipc/ipc_server_man.cpp
+
+${OBJECTDIR}/src/ipc/rabbit_hole.o: src/ipc/rabbit_hole.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src/ipc
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++11 -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/ipc/rabbit_hole.o src/ipc/rabbit_hole.cpp
 
 ${OBJECTDIR}/src/logger.o: src/logger.cpp 
 	${MKDIR} -p ${OBJECTDIR}/src

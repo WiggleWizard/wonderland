@@ -1,4 +1,4 @@
-#include "ipc_comm.h"
+#include "rabbit_hole.h"
 
 #include "ipc_event.h"
 #include "ipc_server_man.h"
@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include <netinet/in.h>
 
-IPCComm::IPCComm(unsigned int commId, std::string path, std::string prefix) {
+RabbitHole::RabbitHole(unsigned int commId, std::string path, std::string prefix) {
 	this->commId = commId;
 	this->path   = path;
 	this->prefix = prefix;
@@ -51,18 +51,18 @@ IPCComm::IPCComm(unsigned int commId, std::string path, std::string prefix) {
 	}
 	
 	// Create the listening thread
-	pthread_create(&this->constructor, NULL, IPCComm::ThreadedConstructor, this);
+	pthread_create(&this->constructor, NULL, RabbitHole::ThreadedConstructor, this);
 }
 
-IPCComm::~IPCComm() {}
+RabbitHole::~RabbitHole() {}
 
 /*===============================================================*\
  * THREADS
 \*===============================================================*/
 
-void* IPCComm::ThreadedConstructor(void* ipcCommPtr)
+void* RabbitHole::ThreadedConstructor(void* ipcCommPtr)
 {
-	IPCComm* self = (IPCComm*) ipcCommPtr;
+	IPCComm* self = (RabbitHole*) ipcCommPtr;
 	
 	printf("Rabbit hole %i initialized, awaiting connection\n", self->commId);
 		
@@ -81,15 +81,15 @@ void* IPCComm::ThreadedConstructor(void* ipcCommPtr)
 	self->active = true;
 	
 	// Create the listening thread
-	pthread_create(&self->listener, NULL, IPCComm::ThreadedListener, self);
+	pthread_create(&self->listener, NULL, RabbitHole::ThreadedListener, self);
 	
 	// Create the sending thread
-	pthread_create(&self->sender, NULL, &IPCComm::ThreadedSender, self);
+	pthread_create(&self->sender, NULL, &RabbitHole::ThreadedSender, self);
 }
 
-void* IPCComm::ThreadedListener(void* ipcCommPtr)
+void* RabbitHole::ThreadedListener(void* ipcCommPtr)
 {
-	IPCComm* self = (IPCComm*) ipcCommPtr;
+	IPCComm* self = (RabbitHole*) ipcCommPtr;
 	
 	while(true)
 	{
@@ -152,9 +152,9 @@ void* IPCComm::ThreadedListener(void* ipcCommPtr)
  * @param ipcCommPtr
  * @return 
  */
-void* IPCComm::ThreadedSender(void* ipcCommPtr)
+void* RabbitHole::ThreadedSender(void* ipcCommPtr)
 {
-	IPCComm* self = (IPCComm*) ipcCommPtr;
+	IPCComm* self = (RabbitHole*) ipcCommPtr;
 	
 	while(true)
 	{
@@ -200,12 +200,12 @@ void* IPCComm::ThreadedSender(void* ipcCommPtr)
  * FUNCTIONS
 \*===============================================================*/
 
-void IPCComm::SignalSend()
+void RabbitHole::SignalSend()
 {
 	pthread_cond_signal(&this->sendSig);
 }
 
-char* IPCComm::RecvChunk(int socket, u_int32_t chunkSize)
+char* RabbitHole::RecvChunk(int socket, u_int32_t chunkSize)
 {
 	// Make space for the payload, setting the last byte to 0x00 as if
 	// it was a C style string
@@ -235,7 +235,7 @@ char* IPCComm::RecvChunk(int socket, u_int32_t chunkSize)
 	return payload;
 }
 
-void IPCComm::ExecVoidFunction(char* func, std::vector<void*>* argv, std::vector<uint8_t>* argt)
+void RabbitHole::ExecVoidFunction(char* func, std::vector<void*>* argv, std::vector<uint8_t>* argt)
 {
 	printf("Executing void function: %s\n", func);
 	
@@ -253,7 +253,7 @@ void IPCComm::ExecVoidFunction(char* func, std::vector<void*>* argv, std::vector
  * PARSERS
 \*===============================================================*/
 
-void IPCComm::ParseVoidFunctionPayload(char*& func, std::vector<void*>* argv, std::vector<uint8_t>* argt, char* payload)
+void RabbitHole::ParseVoidFunctionPayload(char*& func, std::vector<void*>* argv, std::vector<uint8_t>* argt, char* payload)
 {
 	unsigned int cursor = 0;
 	
@@ -315,11 +315,11 @@ void IPCComm::ParseVoidFunctionPayload(char*& func, std::vector<void*>* argv, st
  * GTORS & STORS
 \*===============================================================*/
 
-std::string IPCComm::GetPath() {
+std::string RabbitHole::GetPath() {
 	return std::string(this->path) + std::string(this->prefix) + std::to_string(this->commId) + '\0';
 }
 
-bool IPCComm::IsActive()
+bool RabbitHole::IsActive()
 {
 	return this->active;
 }

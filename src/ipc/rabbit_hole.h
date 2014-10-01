@@ -6,11 +6,11 @@
 
 class IPCCoD4Event;
 
-class IPCComm {
+class RabbitHole {
 public:
-	IPCComm(unsigned int commId, std::string path, std::string prefix);
-	IPCComm(const IPCComm& orig);
-	virtual ~IPCComm();
+	RabbitHole(unsigned int commId, std::string path, std::string prefix);
+	RabbitHole(const RabbitHole& orig);
+	virtual ~RabbitHole();
 	
 /*===============================================================*\
  * THREADS

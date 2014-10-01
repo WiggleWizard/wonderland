@@ -1,5 +1,5 @@
 #include "ipc_server_man.h"
-#include "ipc_comm.h"
+#include "rabbit_hole.h"
 #include "../globals.h"
 
 #include <sys/un.h>
@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <netinet/in.h>
 
-std::vector<IPCComm*>      IPCServer::rabbitHoles;
+std::vector<RabbitHole*>      IPCServer::rabbitHoles;
 std::vector<IPCCoD4Event*> IPCServer::broadcastEvents;
 std::mutex                 IPCServer::bcastEventStackLock;
 
@@ -219,7 +219,7 @@ unsigned int IPCServer::CreateNewComm()
 	unsigned int commId = this->rabbitHoles.size();
 	
 	// Create a new comm and push it into the array
-	this->rabbitHoles.push_back(new IPCComm(commId, this->rabbitHolePath, this->rabbitHolePrefix));
+	this->rabbitHoles.push_back(new RabbitHole(commId, this->rabbitHolePath, this->rabbitHolePrefix));
 	
 	return commId;
 }
@@ -249,7 +249,7 @@ void IPCServer::SetEventForBroadcast(IPCCoD4Event* event)
 	IPCServer::bcastEventStackLock.unlock();
 
 	// Signal all comm channels that an event has triggered
-	IPCComm* rabbitHole = NULL;
+	RabbitHole* rabbitHole = NULL;
 	s = IPCServer::rabbitHoles.size();
 	for(unsigned int i = 0; i < s; i++)
 	{
