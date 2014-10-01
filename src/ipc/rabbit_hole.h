@@ -5,6 +5,7 @@
 #include <vector>
 
 class IPCCoD4Event;
+class IPCReturnFunction;
 
 class RabbitHole {
 public:
@@ -93,7 +94,8 @@ private:
 	int listenSocket;
 	bool active;
 	
-	std::vector<IPCCoD4Event*> sendQueue;
+	std::vector<IPCCoD4Event*>      queueEvents;
+	std::vector<IPCReturnFunction*> queueReturnFunctions;
 };
 
 #endif	/* IPC_COMM_H */

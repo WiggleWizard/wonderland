@@ -1,12 +1,15 @@
 #include "ipc_return_function.h"
 
 #include "../globals.h"
+#include "../cod4/callables.h"
 
 #include <netinet/in.h>
 #include <cstring>
 
 IPCReturnFunction::IPCReturnFunction()
 {
+	this->argv.reserve(5);
+	this->argt.reserve(5);
 }
 
 IPCReturnFunction::IPCReturnFunction(const IPCReturnFunction& orig) {}
@@ -90,5 +93,16 @@ void IPCReturnFunction::Parse(char* payload, bool destructive)
 			
 			cursor += s;
 		}
+	}
+}
+
+void IPCReturnFunction::Execute()
+{
+	if(strcmp(this->functionName, "GETMAXCLIENTS") == 0)
+	{
+		this->functionReturnPtr = (uint32_t*) new char[4];
+		*(uint32_t*) this->functionReturnPtr = Callables::GetMaxClients();
+		
+		this->functionReturnType = IPCTypes::uint;
 	}
 }

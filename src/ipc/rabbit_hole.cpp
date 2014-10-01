@@ -2,6 +2,7 @@
 
 #include "ipc_event.h"
 #include "ipc_server_man.h"
+#include "ipc_return_function.h"
 
 #include "../cod4/callables.h"
 
@@ -85,6 +86,8 @@ void* RabbitHole::ThreadedConstructor(void* ipcCommPtr)
 	
 	// Create the sending thread
 	pthread_create(&self->sender, NULL, &RabbitHole::ThreadedSender, self);
+	
+	return NULL;
 }
 
 void* RabbitHole::ThreadedListener(void* ipcCommPtr)
@@ -93,12 +96,11 @@ void* RabbitHole::ThreadedListener(void* ipcCommPtr)
 	
 	while(true)
 	{
-		char seq[5];
-		int rxStatus = 0;
+		char      seq[5];
+		int       rxStatus = 0;
 		u_int32_t payloadLen = 0;
-		uint8_t packetType;
-		
-		char* payload = NULL;
+		uint8_t   packetType;
+		char*     payload = NULL;
 		
 		// All incoming packets will be prefixed with 5 bytes of important
 		// information.
@@ -112,6 +114,7 @@ void* RabbitHole::ThreadedListener(void* ipcCommPtr)
 		packetType = seq[0];
 		payloadLen = ntohl(*(u_int32_t*) &seq[1]);
 		
+		// Void Function
 		if(packetType == 'V')
 		{
 			// Get the entire payload
@@ -140,11 +143,27 @@ void* RabbitHole::ThreadedListener(void* ipcCommPtr)
 			delete argv;
 			delete argt;
 		}
+		// Return Function
+		else if(packetType == 'R')
+		{
+			// Get the entire payload
+			payload = self->RecvChunk(self->clientSocket, payloadLen);
+			
+			// Construct, parse and exec
+			IPCReturnFunction* returnFunction = new IPCReturnFunction();
+			returnFunction->Parse(payload, false);
+			returnFunction->Execute();
+			
+			// Put it into the send queue
+			self->queueReturnFunctions.push_back(returnFunction);
+		}
 	}
 	
 	printf("Rabbit hole closed by remote\n");
 	
 	self->active = false;
+	
+	return NULL;
 }
 
 /**
@@ -161,7 +180,7 @@ void* RabbitHole::ThreadedSender(void* ipcCommPtr)
 		// The thread will only continue once the signal has been triggered
 		pthread_cond_wait(&self->sendSig, &self->sendLock);
 		
-		if(self->clientSocket == NULL)
+		if(self->clientSocket == 0)
 			printf("NULL\n");
 		
 		IPCServer::bcastEventStackLock.lock();
