@@ -85,6 +85,7 @@ private:
 	
 	pthread_cond_t  sendSig;
 	pthread_mutex_t sendLock;
+	std::mutex returnFunctionsModLock;
 	
 	unsigned int commId;
 	std::string  path;

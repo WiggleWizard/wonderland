@@ -34,6 +34,10 @@ IPCReturnFunction::~IPCReturnFunction()
 		delete [] (char*) this->functionReturnPtr;
 }
 
+/*===============================================================*\
+ * FUNCTIONS
+\*===============================================================*/
+
 void IPCReturnFunction::Parse(char* payload, bool destructive)
 {
 	unsigned int cursor = 0;
@@ -105,4 +109,44 @@ void IPCReturnFunction::Execute()
 		
 		this->functionReturnType = IPCTypes::uint;
 	}
+}
+
+void IPCReturnFunction::Compile()
+{
+	// Clean up memory if exists
+	if(this->packet != NULL)
+		delete this->packet;
+	
+	// Calculate packet length
+	this->packetLen = 1 + 4 + 4 + 1;
+	
+	if(this->functionReturnType == IPCTypes::uint || this->functionReturnType == IPCTypes::sint)
+		this->packetLen += 4;
+	else if(this->functionReturnType == IPCTypes::ch)
+	{
+		this->packetLen += 4;
+		this->packetLen += strlen((char*) this->functionReturnPtr);
+	}
+	
+	this->packet = new char[this->packetLen];
+	
+	// Compile the actual data into the packet
+	u_int32_t cursor = 0;
+	this->packet = new char[this->packetLen];
+	// - Packet type
+	this->packet[0] = 'R';
+	cursor += 1;
+	// - Payload length
+	u_int32_t s = htonl(this->packetLen);
+	memcpy(this->packet + cursor, &s, 4);
+	cursor += 4;
+}
+
+/*===============================================================*\
+ * GTORS & STORS
+\*===============================================================*/
+
+char* IPCReturnFunction::GetPacket()
+{
+	return this->packet;
 }

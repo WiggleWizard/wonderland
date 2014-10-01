@@ -54,8 +54,8 @@ OBJECTFILES= \
 CFLAGS=-m32
 
 # CC Compiler Flags
-CCFLAGS=-m32 -Wall -fexceptions -fPIC -O0 -J3
-CXXFLAGS=-m32 -Wall -fexceptions -fPIC -O0 -J3
+CCFLAGS=-m32 -Wall -fexceptions -fPIC -O0 -J3 -g
+CXXFLAGS=-m32 -Wall -fexceptions -fPIC -O0 -J3 -g
 
 # Fortran Compiler Flags
 FFLAGS=
