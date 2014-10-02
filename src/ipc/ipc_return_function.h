@@ -37,6 +37,7 @@ public:
 \*===============================================================*/
 	
 	char* GetPacket();
+	uint32_t GetPacketLen();
 	
 /*===============================================================*\
  * VARIABLES
@@ -45,13 +46,12 @@ public:
 	void* functionReturnPtr;
 	uint8_t functionReturnType;
 private:
+	uint32_t packetID;
 	char* functionName;
 	std::vector<void*> argv;
 	std::vector<uint8_t> argt;
 	
-	uint32_t packetID;
 	uint32_t packetLen;
-	
 	char* packet;
 };
 

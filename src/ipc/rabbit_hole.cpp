@@ -154,8 +154,7 @@ void* RabbitHole::ThreadedListener(void* ipcCommPtr)
 			returnFunction->Parse(payload, false);
 			returnFunction->Execute();
 			
-			// Put it into open send queue, if no open slots then push ontop of the
-			// stack
+			// Put it into open slot, if no open slots then push ontop of the stack
 			self->returnFunctionsModLock.lock();
 
 			bool found = false;
@@ -234,6 +233,7 @@ void* RabbitHole::ThreadedSender(void* ipcCommPtr)
 		
 		IPCServer::bcastEventStackLock.unlock();
 		
+		
 		self->returnFunctionsModLock.lock();
 		
 		// Compile and send each ReturnFunction
@@ -243,8 +243,14 @@ void* RabbitHole::ThreadedSender(void* ipcCommPtr)
 		{
 			returnFunction = self->queueReturnFunctions[i];
 			
-			returnFunction->Compile();
+			if(returnFunction == NULL)
+				continue;
 			
+			returnFunction->Compile();
+			send(self->clientSocket, returnFunction->GetPacket(), returnFunction->GetPacketLen(), 0);
+			
+			delete returnFunction;
+			self->queueReturnFunctions[i] = NULL;
 		}
 		
 		self->returnFunctionsModLock.unlock();

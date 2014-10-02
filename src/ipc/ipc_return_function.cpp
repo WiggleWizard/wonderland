@@ -5,11 +5,16 @@
 
 #include <netinet/in.h>
 #include <cstring>
+#include <stdio.h>
 
 IPCReturnFunction::IPCReturnFunction()
 {
 	this->argv.reserve(5);
 	this->argt.reserve(5);
+	
+	this->packet             = NULL;
+	this->functionReturnPtr  = NULL;
+	this->functionReturnType = 0;
 }
 
 IPCReturnFunction::IPCReturnFunction(const IPCReturnFunction& orig) {}
@@ -23,15 +28,22 @@ IPCReturnFunction::~IPCReturnFunction()
 			delete (uint32_t*) this->argv[i];
 		else if(this->argt[i] == IPCTypes::ch)
 			delete [] (char*) this->argv[i];
+			
+		this->argv[i] = NULL;
 	}
 	
 	delete [] this->functionName;
+	this->functionName = NULL;
 	
 	// Decide how to delete the return based on its stored type
 	if(this->functionReturnType == IPCTypes::uint || this->functionReturnType == IPCTypes::sint)
 		delete (uint32_t*) this->functionReturnPtr;
 	else if(this->functionReturnType == IPCTypes::ch)
 		delete [] (char*) this->functionReturnPtr;
+	this->functionReturnPtr = NULL;
+		
+	delete [] this->packet;
+	this->packet = NULL;
 }
 
 /*===============================================================*\
@@ -47,7 +59,7 @@ void IPCReturnFunction::Parse(char* payload, bool destructive)
 	cursor += 4;
 	
 	// - Function name size
-	unsigned int funcSize = ntohl(*(uint32_t*) payload + cursor);
+	uint32_t funcSize = ntohl(*(uint32_t*) (payload + cursor));
 	cursor += 4;
 	
 	// - Function name
@@ -104,8 +116,10 @@ void IPCReturnFunction::Execute()
 {
 	if(strcmp(this->functionName, "GETMAXCLIENTS") == 0)
 	{
-		this->functionReturnPtr = (uint32_t*) new char[4];
-		*(uint32_t*) this->functionReturnPtr = Callables::GetMaxClients();
+		this->functionReturnPtr = new char[4];
+		
+		uint32_t s = Callables::GetMaxClients();
+		memcpy(this->functionReturnPtr, &s, 4);
 		
 		this->functionReturnType = IPCTypes::uint;
 	}
@@ -115,10 +129,16 @@ void IPCReturnFunction::Compile()
 {
 	// Clean up memory if exists
 	if(this->packet != NULL)
-		delete this->packet;
+	{
+		delete [] this->packet;
+		this->packet = NULL;
+	}
 	
 	// Calculate packet length
-	this->packetLen = 1 + 4 + 4 + 1;
+	this->packetLen = 1;  // Packet type
+	this->packetLen += 4; // Payload length
+	this->packetLen += 4; // Packet ID
+	this->packetLen += 1; // Return type
 	
 	if(this->functionReturnType == IPCTypes::uint || this->functionReturnType == IPCTypes::sint)
 		this->packetLen += 4;
@@ -128,11 +148,13 @@ void IPCReturnFunction::Compile()
 		this->packetLen += strlen((char*) this->functionReturnPtr);
 	}
 	
-	this->packet = new char[this->packetLen];
+	// Construct a new packet
+	this->packet = new char[this->packetLen + 1];
 	
 	// Compile the actual data into the packet
 	u_int32_t cursor = 0;
 	this->packet = new char[this->packetLen];
+	
 	// - Packet type
 	this->packet[0] = 'R';
 	cursor += 1;
@@ -140,6 +162,25 @@ void IPCReturnFunction::Compile()
 	u_int32_t s = htonl(this->packetLen);
 	memcpy(this->packet + cursor, &s, 4);
 	cursor += 4;
+	// - Packet ID
+	s = htonl(this->packetID);
+	memcpy(this->packet + cursor, &s, 4);
+	cursor += 4;
+	
+	// - Return type
+	memcpy(this->packet + cursor, &this->functionReturnType, 1);
+	cursor += 1;
+	
+	// - Return value
+	if(this->functionReturnType == IPCTypes::uint || this->functionReturnType == IPCTypes::sint)
+	{
+		s = htonl(*(uint32_t*) this->functionReturnPtr);
+		memcpy(this->packet + cursor, &s, 4);
+	}
+	else if(this->functionReturnType == IPCTypes::ch)
+	{
+		memcpy(this->packet + cursor, (char*) this->functionReturnPtr, strlen((char*) this->functionReturnPtr));
+	}
 }
 
 /*===============================================================*\
@@ -149,4 +190,9 @@ void IPCReturnFunction::Compile()
 char* IPCReturnFunction::GetPacket()
 {
 	return this->packet;
+}
+
+uint32_t IPCReturnFunction::GetPacketLen()
+{
+	return this->packetLen;
 }
