@@ -238,7 +238,7 @@ void* RabbitHole::ThreadedSender(void* ipcCommPtr)
 		
 		// Compile and send each ReturnFunction
 		IPCReturnFunction* returnFunction = NULL;
-		unsigned int s = self->queueReturnFunctions.size();
+		s = self->queueReturnFunctions.size();
 		for(unsigned int i = 0; i < s; i++)
 		{
 			returnFunction = self->queueReturnFunctions[i];

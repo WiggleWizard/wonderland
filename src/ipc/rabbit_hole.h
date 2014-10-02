@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <mutex>
 
 class IPCCoD4Event;
 class IPCReturnFunction;
