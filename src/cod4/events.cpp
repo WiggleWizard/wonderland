@@ -5,9 +5,11 @@
 #include "../globals.h"
 #include "../ipc/ipc_event.h"
 #include "../ipc/ipc_server_man.h"
-
 #include "player.h"
 
+#include <arpa/inet.h>
+
+Hook* Events::hPlayerJoinRequest;
 Hook* Events::hPlayerSay;
 Hook* Events::hPlayerChangeName;
 Hook* Events::hServerStatusRequest;
@@ -18,6 +20,7 @@ Events::~Events() {}
 
 void Events::InsertHooks()
 {
+	Events::hPlayerJoinRequest   = new Hook((void*) Events::locPlayerJoinRequest, 5, (void*) Events::HPlayerJoinRequest);
 	Events::hPlayerSay           = new Hook((void*) Events::locPlayerSay, 5, (void*) Events::HPlayerSay);
 	Events::hPlayerChangeName    = new Hook((void*) Events::locPlayerNameChange, 5, (void*) Events::HPlayerNameChange);
 	Events::hServerStatusRequest = new Hook((void*) Events::locRconStatus, 5, (void*) Events::HServerStatusRequest);
@@ -26,6 +29,91 @@ void Events::InsertHooks()
 /*===============================================================*\
  * EVENTS
 \*===============================================================*/
+
+bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long a3, unsigned long a4, unsigned long a5)
+{
+	// Predict slot ID
+	unsigned int slotID = 0;
+	unsigned long offset = 0x090B4F8C;
+	unsigned int assignedSlot = 0;
+	unsigned int maxClients = Callables::GetMaxClients();
+	for(uint32_t i = 0x090B4F8C; ;i += 677436)
+	{
+		// Checks if the state of the slot is disconnected
+		if(*(int*) i > 0)
+			continue;
+		
+		// Calculate slot ID by offset
+		slotID = 35580271 * ((i - 151736204) >> 2);
+		offset = i;
+		
+		if(slotID > maxClients)
+			break;
+		
+		assignedSlot = slotID;
+		
+		bool r = ((Events::funcdefIsPlayerConnectedAtSlot)Events::locfuncIsPlayerConnectedAtSlot)
+					(a1, ip, a3, a4, a5, *(uint32_t *)(i + 32), *(uint32_t *)(i + 36), *(uint32_t *)(i + 40));
+
+		// If the slot was free
+		if(r == false)
+			break;
+	}
+	
+	// Get the string value out of the IP
+	struct in_addr ip_addr;
+	ip_addr.s_addr = ip;
+	char* addr = inet_ntoa(ip_addr);
+	
+	// Copy the IP pointer into a character pointer, this is required because
+	// the char* 'addr' is actually a pointer to a space inside the in_addr
+	// object, so it will be cleaned once the ip_addr object goes out of scope.
+	char* ipAddress = new char[strlen(addr) + 1];
+	memcpy(ipAddress, addr, strlen(addr));
+	ipAddress[strlen(addr)] = '\0';
+	
+	char* cmd = new char[9 + 1];
+	strcpy(cmd, "JOINREQ");
+	IPCCoD4Event* ipcEvent = new IPCCoD4Event(cmd);
+	ipcEvent->AddArgument((void*) ipAddress, IPCTypes::ch);
+	
+	// Broadcast the event
+	IPCServer::SetEventForBroadcast(ipcEvent);
+	
+	// Execute the origional request to join the server
+	Events::hPlayerJoinRequest->UnHook();
+	bool rtn = ((Events::funcdefPlayerJoinRequest)Events::locPlayerJoinRequest)(a1, ip, a3, a4, a5);
+	Events::hPlayerJoinRequest->Rehook();
+	
+	// After the request is executed, we will check if the connection was a success
+	// then fire another event.
+	Player player(assignedSlot);
+	bool r = ((Events::funcdefIsPlayerConnectedAtSlot)Events::locfuncIsPlayerConnectedAtSlot)
+					(a1, ip, a3, a4, a5, *(uint32_t *)(offset + 32), *(uint32_t *)(offset + 36), *(uint32_t *)(offset + 40));
+	printf("Is slot now free after req: %s\n",  r ? "true" : "false");
+	if(player.GetConnState() > 0)
+	{
+		char* ipAddress = new char[strlen(addr) + 1];
+		memcpy(ipAddress, addr, strlen(addr));
+		ipAddress[strlen(addr)] = '\0';
+		
+		unsigned int playerNameLen = strlen(player.GetName());
+		char* playerName = new char[playerNameLen + 1];
+		memcpy(playerName, player.GetName(), playerNameLen);
+		playerName[playerNameLen] = '\0';
+	
+		char* cmd = new char[9 + 1];
+		strcpy(cmd, "JOIN");
+		IPCCoD4Event* ipcEvent = new IPCCoD4Event(cmd);
+		ipcEvent->AddArgument((void*) assignedSlot, IPCTypes::uint);
+		ipcEvent->AddArgument((void*) ipAddress, IPCTypes::ch);
+		ipcEvent->AddArgument((void*) playerName, IPCTypes::ch);
+		
+		IPCServer::SetEventForBroadcast(ipcEvent);
+	}
+	
+	return rtn;
+}
 
 /**
 * Triggered when the player says something
@@ -85,8 +173,6 @@ int Events::HPlayerNameChange(unsigned int playerOffset)
 	IPCCoD4Event* ipcEvent = new IPCCoD4Event(cmd);
 	ipcEvent->AddArgument((void*) playerId, IPCTypes::uint);
 	ipcEvent->AddArgument((void*) newName, IPCTypes::ch);
-	
-	printf("Change name event triggered\n");
 	
 	// Broadcast the event
 	IPCServer::SetEventForBroadcast(ipcEvent);

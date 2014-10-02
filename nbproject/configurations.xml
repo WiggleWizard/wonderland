@@ -1,208 +1,212 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="95">
-	<logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
-		<logicalFolder name="HeaderFiles"
-									 displayName="Header Files"
-									 projectFiles="true">
-		</logicalFolder>
-		<logicalFolder name="ResourceFiles"
-									 displayName="Resource Files"
-									 projectFiles="true">
-		</logicalFolder>
-		<logicalFolder name="SourceFiles"
-									 displayName="Source Files"
-									 projectFiles="true">
-			<logicalFolder name="src" displayName="src" projectFiles="true">
-				<logicalFolder name="cod4" displayName="cod4" projectFiles="true">
-					<itemPath>src/cod4/callables.cpp</itemPath>
-					<itemPath>src/cod4/callables.h</itemPath>
-					<itemPath>src/cod4/controller.cpp</itemPath>
-					<itemPath>src/cod4/controller.h</itemPath>
-					<itemPath>src/cod4/events.cpp</itemPath>
-					<itemPath>src/cod4/events.h</itemPath>
-					<itemPath>src/cod4/hook.cpp</itemPath>
-					<itemPath>src/cod4/hook.h</itemPath>
-					<itemPath>src/cod4/player.cpp</itemPath>
-					<itemPath>src/cod4/player.h</itemPath>
-				</logicalFolder>
-				<logicalFolder name="ipc" displayName="ipc" projectFiles="true">
-					<itemPath>src/ipc/ipc_event.cpp</itemPath>
-					<itemPath>src/ipc/ipc_event.h</itemPath>
-					<itemPath>src/ipc/ipc_rx_func_pkt.cpp</itemPath>
-					<itemPath>src/ipc/ipc_rx_func_pkt.h</itemPath>
-					<itemPath>src/ipc/ipc_server_man.cpp</itemPath>
-					<itemPath>src/ipc/ipc_server_man.h</itemPath>
-				</logicalFolder>
-				<itemPath>src/globals.cpp</itemPath>
-				<itemPath>src/globals.h</itemPath>
-				<itemPath>src/logger.cpp</itemPath>
-				<itemPath>src/logger.h</itemPath>
-				<itemPath>src/main.cpp</itemPath>
-			</logicalFolder>
-		</logicalFolder>
-		<logicalFolder name="TestFiles"
-									 displayName="Test Files"
-									 projectFiles="false"
-									 kind="TEST_LOGICAL_FOLDER">
-		</logicalFolder>
-		<logicalFolder name="ExternalFiles"
-									 displayName="Important Files"
-									 projectFiles="false"
-									 kind="IMPORTANT_FILES_FOLDER">
-			<itemPath>Makefile</itemPath>
-		</logicalFolder>
-	</logicalFolder>
-	<sourceRootList>
-		<Elem>src</Elem>
-		<Elem>src</Elem>
-	</sourceRootList>
-	<projectmakefile>Makefile</projectmakefile>
-	<confs>
-		<conf name="Debug" type="2">
-			<toolsSet>
-				<compilerSet>default</compilerSet>
-				<dependencyChecking>true</dependencyChecking>
-				<rebuildPropChanged>false</rebuildPropChanged>
-			</toolsSet>
-			<compileType>
-				<cTool>
-					<architecture>1</architecture>
-					<standard>10</standard>
-				</cTool>
-				<ccTool>
-					<architecture>1</architecture>
-					<standard>8</standard>
-					<commandLine>-Wall -fexceptions -fPIC -O0 -J3 -g</commandLine>
-				</ccTool>
-				<asmTool>
-					<architecture>1</architecture>
-				</asmTool>
-				<linkerTool>
-					<commandLine>-ldl -m32 -fPIC</commandLine>
-				</linkerTool>
-			</compileType>
-			<item path="src/cod4/callables.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/cod4/callables.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/cod4/controller.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/cod4/controller.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/cod4/events.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/cod4/events.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/cod4/hook.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/cod4/hook.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/cod4/player.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/cod4/player.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/globals.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/globals.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/ipc/ipc_event.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/ipc/ipc_event.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/ipc/ipc_return_function.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/ipc/ipc_return_function.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/ipc/ipc_rx_func_pkt.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/ipc/ipc_rx_func_pkt.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/ipc/ipc_server_man.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/ipc/ipc_server_man.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/ipc/rabbit_hole.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/ipc/rabbit_hole.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/logger.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/logger.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/main.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-		</conf>
-		<conf name="Release" type="2">
-			<toolsSet>
-				<compilerSet>default</compilerSet>
-				<dependencyChecking>true</dependencyChecking>
-				<rebuildPropChanged>false</rebuildPropChanged>
-			</toolsSet>
-			<compileType>
-				<cTool>
-					<developmentMode>5</developmentMode>
-				</cTool>
-				<ccTool>
-					<developmentMode>5</developmentMode>
-					<standard>8</standard>
-				</ccTool>
-				<fortranCompilerTool>
-					<developmentMode>5</developmentMode>
-				</fortranCompilerTool>
-				<asmTool>
-					<developmentMode>5</developmentMode>
-				</asmTool>
-			</compileType>
-			<item path="src/cod4/callables.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/cod4/callables.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/cod4/controller.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/cod4/controller.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/cod4/events.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/cod4/events.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/cod4/hook.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/cod4/hook.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/cod4/player.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/cod4/player.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/globals.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/globals.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/ipc/ipc_event.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/ipc/ipc_event.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/ipc/ipc_return_function.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/ipc/ipc_return_function.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/ipc/ipc_rx_func_pkt.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/ipc/ipc_rx_func_pkt.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/ipc/ipc_server_man.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/ipc/ipc_server_man.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/ipc/rabbit_hole.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/ipc/rabbit_hole.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/logger.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-			<item path="src/logger.h" ex="false" tool="3" flavor2="0">
-			</item>
-			<item path="src/main.cpp" ex="false" tool="1" flavor2="0">
-			</item>
-		</conf>
-	</confs>
+  <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="HeaderFiles"
+                   displayName="Header Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="ResourceFiles"
+                   displayName="Resource Files"
+                   projectFiles="true">
+    </logicalFolder>
+    <logicalFolder name="SourceFiles"
+                   displayName="Source Files"
+                   projectFiles="true">
+      <logicalFolder name="src" displayName="src" projectFiles="true">
+        <logicalFolder name="cod4" displayName="cod4" projectFiles="true">
+          <itemPath>src/cod4/callables.cpp</itemPath>
+          <itemPath>src/cod4/callables.h</itemPath>
+          <itemPath>src/cod4/controller.cpp</itemPath>
+          <itemPath>src/cod4/controller.h</itemPath>
+          <itemPath>src/cod4/events.cpp</itemPath>
+          <itemPath>src/cod4/events.h</itemPath>
+          <itemPath>src/cod4/hook.cpp</itemPath>
+          <itemPath>src/cod4/hook.h</itemPath>
+          <itemPath>src/cod4/player.cpp</itemPath>
+          <itemPath>src/cod4/player.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="ipc" displayName="ipc" projectFiles="true">
+          <itemPath>src/ipc/ipc_event.cpp</itemPath>
+          <itemPath>src/ipc/ipc_event.h</itemPath>
+          <itemPath>src/ipc/ipc_return_function.cpp</itemPath>
+          <itemPath>src/ipc/ipc_return_function.h</itemPath>
+          <itemPath>src/ipc/ipc_rx_func_pkt.cpp</itemPath>
+          <itemPath>src/ipc/ipc_rx_func_pkt.h</itemPath>
+          <itemPath>src/ipc/ipc_server_man.cpp</itemPath>
+          <itemPath>src/ipc/ipc_server_man.h</itemPath>
+          <itemPath>src/ipc/rabbit_hole.cpp</itemPath>
+          <itemPath>src/ipc/rabbit_hole.h</itemPath>
+        </logicalFolder>
+        <itemPath>src/globals.cpp</itemPath>
+        <itemPath>src/globals.h</itemPath>
+        <itemPath>src/logger.cpp</itemPath>
+        <itemPath>src/logger.h</itemPath>
+        <itemPath>src/main.cpp</itemPath>
+      </logicalFolder>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
+    </logicalFolder>
+  </logicalFolder>
+  <sourceRootList>
+    <Elem>src</Elem>
+    <Elem>src</Elem>
+  </sourceRootList>
+  <projectmakefile>Makefile</projectmakefile>
+  <confs>
+    <conf name="Debug" type="2">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <architecture>1</architecture>
+          <standard>10</standard>
+        </cTool>
+        <ccTool>
+          <architecture>1</architecture>
+          <standard>8</standard>
+          <commandLine>-Wall -fexceptions -fPIC -O0 -J3 -g</commandLine>
+        </ccTool>
+        <asmTool>
+          <architecture>1</architecture>
+        </asmTool>
+        <linkerTool>
+          <commandLine>-ldl -m32 -fPIC</commandLine>
+        </linkerTool>
+      </compileType>
+      <item path="src/cod4/callables.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/cod4/callables.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/cod4/controller.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/cod4/controller.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/cod4/events.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/cod4/events.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/cod4/hook.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/cod4/hook.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/cod4/player.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/cod4/player.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/globals.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/globals.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ipc/ipc_event.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ipc/ipc_event.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ipc/ipc_return_function.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ipc/ipc_return_function.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ipc/ipc_rx_func_pkt.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ipc/ipc_rx_func_pkt.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ipc/ipc_server_man.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ipc/ipc_server_man.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ipc/rabbit_hole.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ipc/rabbit_hole.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/logger.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/logger.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+    </conf>
+    <conf name="Release" type="2">
+      <toolsSet>
+        <compilerSet>default</compilerSet>
+        <dependencyChecking>true</dependencyChecking>
+        <rebuildPropChanged>false</rebuildPropChanged>
+      </toolsSet>
+      <compileType>
+        <cTool>
+          <developmentMode>5</developmentMode>
+        </cTool>
+        <ccTool>
+          <developmentMode>5</developmentMode>
+          <standard>8</standard>
+        </ccTool>
+        <fortranCompilerTool>
+          <developmentMode>5</developmentMode>
+        </fortranCompilerTool>
+        <asmTool>
+          <developmentMode>5</developmentMode>
+        </asmTool>
+      </compileType>
+      <item path="src/cod4/callables.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/cod4/callables.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/cod4/controller.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/cod4/controller.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/cod4/events.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/cod4/events.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/cod4/hook.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/cod4/hook.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/cod4/player.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/cod4/player.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/globals.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/globals.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ipc/ipc_event.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ipc/ipc_event.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ipc/ipc_return_function.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ipc/ipc_return_function.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ipc/ipc_rx_func_pkt.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ipc/ipc_rx_func_pkt.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ipc/ipc_server_man.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ipc/ipc_server_man.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ipc/rabbit_hole.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/ipc/rabbit_hole.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/logger.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/logger.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+    </conf>
+  </confs>
 </configurationDescriptor>

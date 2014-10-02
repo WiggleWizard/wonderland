@@ -11,8 +11,9 @@ class Callables {
 	static const unsigned long locMaxClients = 0x8370624; // Max clients allowed on the server
 	
 	// Type definitions
-	typedef char* (*funcdefGetValueFromSlashString)(char* slashedString, char* key);
+	typedef char*        (*funcdefGetValueFromSlashString)(char* slashedString, char* key);
 	typedef unsigned int (*funcdefPlayerForceName)(unsigned long playerId);
+	
 	
 public:
 	Callables();
