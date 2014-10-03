@@ -8,6 +8,7 @@ class Hook;
 
 class Events {
 	static const unsigned long locPlayerJoinRequest = 0x0817153E;
+	static const unsigned long locPlayerDisconnect  = 0x08170A26;
 	static const unsigned long locPlayerSay         = 0x080AE962;
 	static const unsigned long locPlayerNameChange  = 0x081705EC;
 	static const unsigned long locRconStatus        = 0x0816C708;
@@ -16,6 +17,7 @@ class Events {
 	
 	// Function definitions, in case the events need to be recalled
 	typedef bool (*funcdefPlayerJoinRequest)(uint32_t a1, uint32_t ip, uint32_t a3, uint32_t a4, unsigned long a5);
+	typedef int  (*funcdefPlayerDisconnect)(unsigned long playerOffset, void* a2, unsigned int reason);
 	typedef bool (*funcdefIsPlayerConnectedAtSlot)(int a1, int a2, int a3, int a4, int a5, uint32_t offset1PtrVal, uint32_t offset2PtrVal, uint32_t offset3PtrVal);
 public:
 	Events();
@@ -33,6 +35,7 @@ public:
 \*===============================================================*/
 	
 	static bool HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long a3, unsigned long a4, unsigned long a5);
+	static int  HPlayerDisconnect(unsigned long playerOffset, void* a2, unsigned int reason);
 	static int  HPlayerSay(unsigned int* playerId, int a2, int teamSay, char* message);
 	static int  HPlayerNameChange(unsigned int playerOffset);
 	static int  HServerStatusRequest();
@@ -42,6 +45,7 @@ public:
 \*===============================================================*/
 	
 	static Hook* hPlayerJoinRequest;
+	static Hook* hPlayerDisconnect;
 	static Hook* hPlayerSay;
 	static Hook* hPlayerChangeName;
 	static Hook* hServerStatusRequest;

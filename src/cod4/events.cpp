@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 
 Hook* Events::hPlayerJoinRequest;
+Hook* Events::hPlayerDisconnect;
 Hook* Events::hPlayerSay;
 Hook* Events::hPlayerChangeName;
 Hook* Events::hServerStatusRequest;
@@ -21,6 +22,7 @@ Events::~Events() {}
 void Events::InsertHooks()
 {
 	Events::hPlayerJoinRequest   = new Hook((void*) Events::locPlayerJoinRequest, 5, (void*) Events::HPlayerJoinRequest);
+	Events::hPlayerDisconnect    = new Hook((void*) Events::locPlayerDisconnect, 5, (void*) Events::HPlayerDisconnect);
 	Events::hPlayerSay           = new Hook((void*) Events::locPlayerSay, 5, (void*) Events::HPlayerSay);
 	Events::hPlayerChangeName    = new Hook((void*) Events::locPlayerNameChange, 5, (void*) Events::HPlayerNameChange);
 	Events::hServerStatusRequest = new Hook((void*) Events::locRconStatus, 5, (void*) Events::HServerStatusRequest);
@@ -65,7 +67,7 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long a3,
 	memcpy(ipAddress, addr, strlen(addr));
 	ipAddress[strlen(addr)] = '\0';
 	
-	char* cmd = new char[9 + 1];
+	char* cmd = new char[7 + 1];
 	strcpy(cmd, "JOINREQ");
 	IPCCoD4Event* ipcEvent = new IPCCoD4Event(cmd);
 	ipcEvent->AddArgument((void*) ipAddress, IPCTypes::ch);
@@ -97,7 +99,7 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long a3,
 		memcpy(guid, player.GetGuid(), guidLen);
 		guid[guidLen] = '\0';
 	
-		char* cmd = new char[9 + 1];
+		char* cmd = new char[4 + 1];
 		strcpy(cmd, "JOIN");
 		IPCCoD4Event* ipcEvent = new IPCCoD4Event(cmd);
 		ipcEvent->AddArgument((void*) slotID, IPCTypes::uint);
@@ -109,6 +111,23 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long a3,
 	}
 	
 	return rtn;
+}
+
+int Events::HPlayerDisconnect(unsigned long playerOffset, void* a2, unsigned int reason)
+{
+	unsigned int slotID = 35580271 * ((playerOffset - 151736204) >> 2);
+	
+	char* cmd = new char[10 + 1];
+	strcpy(cmd, "DISCONNECT");
+	IPCCoD4Event* ipcEvent = new IPCCoD4Event(cmd);
+	ipcEvent->AddArgument((void*) slotID, IPCTypes::uint);
+	
+	IPCServer::SetEventForBroadcast(ipcEvent);
+	
+	// Call the original function
+	Events::hPlayerDisconnect->UnHook();
+	int rtn = ((Events::funcdefPlayerDisconnect)Events::locPlayerDisconnect)(playerOffset, a2, reason);
+	Events::hPlayerDisconnect->Rehook();
 }
 
 /**
