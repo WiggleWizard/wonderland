@@ -33,31 +33,34 @@ void Events::InsertHooks()
 bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long a3, unsigned long a4, unsigned long a5)
 {
 	// Predict slot ID
-	unsigned int slotID = 0;
-	unsigned long offset = 0x090B4F8C;
-	unsigned int assignedSlot = 0;
+	unsigned int  slotID       = 0;
+	unsigned long slotOffset   = 0x090B4F8C;
+	unsigned int  assignedSlot = 0;
+	
 	unsigned int maxClients = Callables::GetMaxClients();
 	for(uint32_t i = 0x090B4F8C; ;i += 677436)
 	{
-		// Checks if the state of the slot is disconnected
-		if(*(int*) i > 0)
-			continue;
-		
-		// Calculate slot ID by offset
-		slotID = 35580271 * ((i - 151736204) >> 2);
-		offset = i;
-		
 		if(slotID > maxClients)
 			break;
 		
-		assignedSlot = slotID;
+		slotID = 35580271 * ((i - 151736204) >> 2);
 		
-		bool r = ((Events::funcdefIsPlayerConnectedAtSlot)Events::locfuncIsPlayerConnectedAtSlot)
-					(a1, ip, a3, a4, a5, *(uint32_t *)(i + 32), *(uint32_t *)(i + 36), *(uint32_t *)(i + 40));
+		// If the slot's disconnected
+		if(*(uint32_t*) i == 0)
+		{
+			slotOffset = i;
+			
+			printf("Slot [%i] is going to be used is currently in state: %i\n", slotID, *(uint32_t*) slotOffset);
+			
+			break;
+		}
+		
+		//bool r = ((Events::funcdefIsPlayerConnectedAtSlot)Events::locfuncIsPlayerConnectedAtSlot)
+					//(a1, ip, a3, a4, a5, *(uint32_t *)(i + 32), *(uint32_t *)(i + 36), *(uint32_t *)(i + 40));
 
 		// If the slot was free
-		if(r == false)
-			break;
+		//if(r == false)
+			//break;
 	}
 	
 	// Get the string value out of the IP
@@ -87,10 +90,7 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long a3,
 	
 	// After the request is executed, we will check if the connection was a success
 	// then fire another event.
-	Player player(assignedSlot);
-	bool r = ((Events::funcdefIsPlayerConnectedAtSlot)Events::locfuncIsPlayerConnectedAtSlot)
-					(a1, ip, a3, a4, a5, *(uint32_t *)(offset + 32), *(uint32_t *)(offset + 36), *(uint32_t *)(offset + 40));
-	printf("Is slot now free after req: %s\n",  r ? "true" : "false");
+	Player player(slotID);
 	if(player.GetConnState() > 0)
 	{
 		char* ipAddress = new char[strlen(addr) + 1];
@@ -101,12 +101,18 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long a3,
 		char* playerName = new char[playerNameLen + 1];
 		memcpy(playerName, player.GetName(), playerNameLen);
 		playerName[playerNameLen] = '\0';
+		
+		unsigned int guidLen = strlen(player.GetGuid());
+		char* guid = new char[guidLen + 1];
+		memcpy(guid, player.GetGuid(), guidLen);
+		guid[guidLen] = '\0';
 	
 		char* cmd = new char[9 + 1];
 		strcpy(cmd, "JOIN");
 		IPCCoD4Event* ipcEvent = new IPCCoD4Event(cmd);
 		ipcEvent->AddArgument((void*) assignedSlot, IPCTypes::uint);
 		ipcEvent->AddArgument((void*) ipAddress, IPCTypes::ch);
+		ipcEvent->AddArgument((void*) guid, IPCTypes::ch);
 		ipcEvent->AddArgument((void*) playerName, IPCTypes::ch);
 		
 		IPCServer::SetEventForBroadcast(ipcEvent);
