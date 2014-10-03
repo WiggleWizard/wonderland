@@ -35,7 +35,6 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long a3,
 	// Predict slot ID
 	unsigned int  slotID       = 0;
 	unsigned long slotOffset   = 0x090B4F8C;
-	unsigned int  assignedSlot = 0;
 	
 	unsigned int maxClients = Callables::GetMaxClients();
 	for(uint32_t i = 0x090B4F8C; ;i += 677436)
@@ -43,25 +42,16 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long a3,
 		if(slotID > maxClients)
 			break;
 		
-		slotID = 35580271 * ((i - 151736204) >> 2);
-		
 		// If the slot's disconnected
 		if(*(uint32_t*) i == 0)
 		{
 			slotOffset = i;
-			
-			printf("Slot [%i] is going to be used is currently in state: %i\n", slotID, *(uint32_t*) slotOffset);
-			
+			slotID = 35580271 * ((i - 151736204) >> 2);
 			break;
 		}
-		
-		//bool r = ((Events::funcdefIsPlayerConnectedAtSlot)Events::locfuncIsPlayerConnectedAtSlot)
-					//(a1, ip, a3, a4, a5, *(uint32_t *)(i + 32), *(uint32_t *)(i + 36), *(uint32_t *)(i + 40));
-
-		// If the slot was free
-		//if(r == false)
-			//break;
 	}
+	
+	printf("Slot %i predicted to connect\n", slotID);
 	
 	// Get the string value out of the IP
 	struct in_addr ip_addr;
@@ -110,7 +100,7 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long a3,
 		char* cmd = new char[9 + 1];
 		strcpy(cmd, "JOIN");
 		IPCCoD4Event* ipcEvent = new IPCCoD4Event(cmd);
-		ipcEvent->AddArgument((void*) assignedSlot, IPCTypes::uint);
+		ipcEvent->AddArgument((void*) slotID, IPCTypes::uint);
 		ipcEvent->AddArgument((void*) ipAddress, IPCTypes::ch);
 		ipcEvent->AddArgument((void*) guid, IPCTypes::ch);
 		ipcEvent->AddArgument((void*) playerName, IPCTypes::ch);
