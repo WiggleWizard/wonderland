@@ -300,8 +300,6 @@ char* RabbitHole::RecvChunk(int socket, u_int32_t chunkSize)
 
 void RabbitHole::ExecVoidFunction(char* func, std::vector<void*>* argv, std::vector<uint8_t>* argt)
 {
-	printf("Executing void function: %s\n", func);
-	
 	if(strcmp(func, "BCASTCHAT") == 0)
 	{
 		Callables::BroadcastChat((char*) (*argv)[0]);
@@ -309,6 +307,14 @@ void RabbitHole::ExecVoidFunction(char* func, std::vector<void*>* argv, std::vec
 	else if(strcmp(func, "SETPLAYERNAME") == 0)
 	{
 		Callables::SetPlayerName(*(unsigned int*) (*argv)[0], (char*) (*argv)[1]);
+	}
+	else if(strcmp(func, "TELL") == 0)
+	{
+		Callables::TellPlayer(*(unsigned int*) (*argv)[0], (char*) (*argv)[1]);
+	}
+	else if(strcmp(func, "LIMBOACCEPT") == 0)
+	{
+		
 	}
 }
 

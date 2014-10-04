@@ -25,6 +25,7 @@ public:
 	static uint32_t GetMaxClients();
 	static char* GetValueFromSlashString(char* slashedString, char* key);
 	static void SetPlayerName(unsigned int playerId, char* name);
+	static void TellPlayer(unsigned int playerId, char* message);
 private:
 
 };

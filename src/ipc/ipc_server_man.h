@@ -15,6 +15,7 @@
 
 class RabbitHole;
 class IPCCoD4Event;
+class Limbo;
 
 class IPCServer {
 public:
@@ -96,6 +97,9 @@ public:
      * @param event
      */
 	static void DestroyEvent(IPCCoD4Event* event);
+	
+	static void LimboDeny(char* ip, char* reason);
+	static void LimboAccept(char* ip);
 
 /*===============================================================*\
  * VARIABLES
@@ -107,6 +111,9 @@ public:
 	// Holds event type packets which should be broadcasted across
 	// all connected clients.
 	static std::vector<IPCCoD4Event*> broadcastEvents;
+	
+	// Holds limbo structs
+	static std::vector<Limbo*> limbo;
 	
 	static std::mutex bcastEventStackLock; // TODO: Refactor to name: bcastEventStackLock
 	

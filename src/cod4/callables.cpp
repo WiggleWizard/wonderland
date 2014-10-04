@@ -46,3 +46,9 @@ void Callables::SetPlayerName(unsigned int playerId, char* name)
 	Player player(playerId);
 	player.SetName(name);
 }
+
+void Callables::TellPlayer(unsigned int playerId, char* message)
+{
+	Player player(playerId);
+	player.SendMessage(message);	
+}

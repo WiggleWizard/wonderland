@@ -6,6 +6,7 @@
 #include "../ipc/ipc_event.h"
 #include "../ipc/ipc_server_man.h"
 #include "player.h"
+#include "../ipc/limbo.h"
 
 #include <arpa/inet.h>
 
@@ -56,61 +57,136 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long a3,
 	printf("Slot %i predicted to connect\n", slotID);
 	
 	// Get the string value out of the IP
+	// NOTE: Throughout this code you will see this IP being copied to memory.
+	//       this is because this char* will be destroyed once in_addr goes out
+	//       of scope.
 	struct in_addr ip_addr;
 	ip_addr.s_addr = ip;
 	char* addr = inet_ntoa(ip_addr);
 	
-	// Copy the IP pointer into a character pointer, this is required because
-	// the char* 'addr' is actually a pointer to a space inside the in_addr
-	// object, so it will be cleaned once the ip_addr object goes out of scope.
-	char* ipAddress = new char[strlen(addr) + 1];
-	memcpy(ipAddress, addr, strlen(addr));
-	ipAddress[strlen(addr)] = '\0';
-	
-	char* cmd = new char[7 + 1];
-	strcpy(cmd, "JOINREQ");
-	IPCCoD4Event* ipcEvent = new IPCCoD4Event(cmd);
-	ipcEvent->AddArgument((void*) ipAddress, IPCTypes::ch);
-	
-	// Broadcast the event
-	IPCServer::SetEventForBroadcast(ipcEvent);
-	
-	// Execute the origional request to join the server
-	Events::hPlayerJoinRequest->UnHook();
-	bool rtn = ((Events::funcdefPlayerJoinRequest)Events::locPlayerJoinRequest)(a1, ip, a3, a4, a5);
-	Events::hPlayerJoinRequest->Rehook();
-	
-	// After the request is executed, we will check if the connection was a success
-	// then fire another event.
-	Player player(slotID);
-	if(player.GetConnState() > 0)
+	// Iterate over the limbos and deal with each one according to what state it's
+	// in. If there is no limbo then it will create one for that IP.
+	bool hasLimbo          = false;
+	unsigned int openLimbo = 0; // Limbo index free to overwrite
+	bool foundOpenLimbo    = false;
+	bool destroyLimbo      = false;
+	unsigned int s         = IPCServer::limbo.size();
+	for(unsigned int i = 0; i < s; i++) 
 	{
+		Limbo* limbo = IPCServer::limbo[i];
+		
+		if(limbo == NULL)
+		{
+			// Mark the index where we can insert a limbo if the IP does not have one
+			if(!foundOpenLimbo)
+			{
+				foundOpenLimbo = true;
+				openLimbo = i;
+			}
+			
+			continue;
+		}
+		
+		destroyLimbo = false;
+		
+		// We get to this part only if there's a limbo present at the current index
+		if(strcmp(addr, limbo->ip) == 0)
+		{
+			// Mark the IP
+			hasLimbo = true;
+			
+			// Limbo set to accept
+			if(limbo->state == 1)
+			{
+				// Execute the origional request to join the server
+				Events::hPlayerJoinRequest->UnHook();
+				bool rtn = ((Events::funcdefPlayerJoinRequest)Events::locPlayerJoinRequest)(a1, ip, a3, a4, a5);
+				Events::hPlayerJoinRequest->Rehook();
+				
+				// After the request is executed, we will check if the connection was a success
+				// then fire another event.
+				Player player(slotID);
+				printf("Slot %i conn state: %i, name: %s\n", slotID, player.GetConnState(), player.GetName());
+				if(player.GetConnState() > 0)
+				{
+					// Copy IP into memory
+					char* ipAddress = new char[strlen(addr) + 1];
+					memcpy(ipAddress, addr, strlen(addr));
+					ipAddress[strlen(addr)] = '\0';
+
+					// Player name to memory
+					unsigned int playerNameLen = strlen(player.GetName());
+					char* playerName = new char[playerNameLen + 1];
+					memcpy(playerName, player.GetName(), playerNameLen);
+					playerName[playerNameLen] = '\0';
+
+					// GUID to memory
+					unsigned int guidLen = strlen(player.GetGuid());
+					char* guid = new char[guidLen + 1];
+					memcpy(guid, player.GetGuid(), guidLen);
+					guid[guidLen] = '\0';
+
+					char* cmd = new char[4 + 1];
+					strcpy(cmd, "JOIN");
+					IPCCoD4Event* ipcEvent = new IPCCoD4Event(cmd);
+					ipcEvent->AddArgument((void*) slotID, IPCTypes::uint);
+					ipcEvent->AddArgument((void*) ipAddress, IPCTypes::ch);
+					ipcEvent->AddArgument((void*) guid, IPCTypes::ch);
+					ipcEvent->AddArgument((void*) playerName, IPCTypes::ch);
+
+					// Broadcast created event
+					IPCServer::SetEventForBroadcast(ipcEvent);
+					printf("JOIN event fired\n");
+				}
+				
+				// Mark the limbo for destruction
+				destroyLimbo = true;
+			}
+			// Limbo is set to deny
+			else if(limbo->state == 2)
+			{
+				
+			}
+			
+			// Destroy the Limbo if it's marked for destruction
+			if(destroyLimbo)
+			{
+				delete limbo;
+				IPCServer::limbo[i] = NULL;
+			}
+			
+			break;
+		}
+	}
+	
+	// No limbo match was made, so we make one here and fire the request
+	// event.
+	if(!hasLimbo)
+	{
+		printf("IP has no Limbo, creating one\n");
+		Limbo* limbo = new Limbo;
+
+		// Copy IP into memory
+		char* ipAddressLimbo = new char[strlen(addr) + 1];
+		memcpy(ipAddressLimbo, addr, strlen(addr));
+		ipAddressLimbo[strlen(addr)] = '\0';
+		limbo->ip = ipAddressLimbo;
+
+		// Insert into limbo queue
+		IPCServer::limbo[openLimbo] = limbo;
+
 		char* ipAddress = new char[strlen(addr) + 1];
 		memcpy(ipAddress, addr, strlen(addr));
 		ipAddress[strlen(addr)] = '\0';
-		
-		unsigned int playerNameLen = strlen(player.GetName());
-		char* playerName = new char[playerNameLen + 1];
-		memcpy(playerName, player.GetName(), playerNameLen);
-		playerName[playerNameLen] = '\0';
-		
-		unsigned int guidLen = strlen(player.GetGuid());
-		char* guid = new char[guidLen + 1];
-		memcpy(guid, player.GetGuid(), guidLen);
-		guid[guidLen] = '\0';
-	
-		char* cmd = new char[4 + 1];
-		strcpy(cmd, "JOIN");
+
+		char* cmd = new char[7 + 1];
+		strcpy(cmd, "JOINREQ");
 		IPCCoD4Event* ipcEvent = new IPCCoD4Event(cmd);
-		ipcEvent->AddArgument((void*) slotID, IPCTypes::uint);
 		ipcEvent->AddArgument((void*) ipAddress, IPCTypes::ch);
-		ipcEvent->AddArgument((void*) guid, IPCTypes::ch);
-		ipcEvent->AddArgument((void*) playerName, IPCTypes::ch);
-		
+
+		// Broadcast the event
 		IPCServer::SetEventForBroadcast(ipcEvent);
 	}
-	
-	return rtn;
 }
 
 int Events::HPlayerDisconnect(unsigned long playerOffset, void* a2, unsigned int reason)
@@ -141,6 +217,10 @@ int Events::HPlayerDisconnect(unsigned long playerOffset, void* a2, unsigned int
 */
 int Events::HPlayerSay(unsigned int* playerId, int a2, int teamSay, char* message)
 {
+	if(message[0] == 0x15)
+	{
+		message += 1;
+	}
 	// Prepare the arguments and types for the event
 	//int* argTeamSay = new int;
 	//*argTeamSay = teamSay;

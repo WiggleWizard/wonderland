@@ -1,15 +1,17 @@
 #include "ipc_server_man.h"
 #include "rabbit_hole.h"
 #include "../globals.h"
+#include "limbo.h"
 
 #include <sys/un.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <netinet/in.h>
 
-std::vector<RabbitHole*>      IPCServer::rabbitHoles;
+std::vector<RabbitHole*>   IPCServer::rabbitHoles;
 std::vector<IPCCoD4Event*> IPCServer::broadcastEvents;
 std::mutex                 IPCServer::bcastEventStackLock;
+std::vector<Limbo*>        IPCServer::limbo;
 
 IPCServer::IPCServer(char* wid) {
 	// Initialize the client holder
@@ -17,6 +19,9 @@ IPCServer::IPCServer(char* wid) {
 
 	// Allocate some memory for the broadcastEvents stack
 	IPCServer::broadcastEvents.reserve(20);
+	
+	// Allocate some space for limbo players
+	IPCServer::limbo.reserve(20);
 	
 	this->wid = wid;
 	
@@ -282,4 +287,23 @@ void IPCServer::DestroyEvent(IPCCoD4Event* event)
 	}
 
 	//IPCServer::bcastEventStackLock.unlock();
+}
+
+void LimboDeny(char* ip, char* reason)
+{
+	unsigned int s = IPCServer::limbo.size();
+	for(unsigned int i = 0; i < s; i++) 
+	{
+		Limbo* limbo = IPCServer::limbo[i];
+		
+		if(strcmp(ip, limbo->ip) == 0)
+		{
+			
+			break;
+		}
+	}
+}
+void LimboAccept(char* ip)
+{
+	
 }

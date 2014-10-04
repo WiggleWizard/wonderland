@@ -34,6 +34,7 @@
           <itemPath>src/ipc/ipc_rx_func_pkt.h</itemPath>
           <itemPath>src/ipc/ipc_server_man.cpp</itemPath>
           <itemPath>src/ipc/ipc_server_man.h</itemPath>
+          <itemPath>src/ipc/limbo.h</itemPath>
           <itemPath>src/ipc/rabbit_hole.cpp</itemPath>
           <itemPath>src/ipc/rabbit_hole.h</itemPath>
         </logicalFolder>
@@ -125,6 +126,8 @@
       </item>
       <item path="src/ipc/ipc_server_man.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="src/ipc/limbo.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src/ipc/rabbit_hole.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/ipc/rabbit_hole.h" ex="false" tool="3" flavor2="0">
@@ -196,6 +199,8 @@
       <item path="src/ipc/ipc_server_man.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src/ipc/ipc_server_man.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/ipc/limbo.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/ipc/rabbit_hole.cpp" ex="false" tool="1" flavor2="0">
       </item>
