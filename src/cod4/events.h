@@ -14,11 +14,13 @@ class Events {
 	static const unsigned long locRconStatus        = 0x0816C708;
 	
 	static const unsigned long locfuncIsPlayerConnectedAtSlot = 0x0813C0C4;
+	static const unsigned long locfuncPacketResponseLoc       = 0x0813D086;
 	
 	// Function definitions, in case the events need to be recalled
 	typedef bool (*funcdefPlayerJoinRequest)(uint32_t a1, uint32_t ip, uint32_t a3, uint32_t a4, unsigned long a5);
 	typedef int  (*funcdefPlayerDisconnect)(unsigned long playerOffset, void* a2, unsigned int reason);
 	typedef bool (*funcdefIsPlayerConnectedAtSlot)(int a1, int a2, int a3, int a4, int a5, uint32_t offset1PtrVal, uint32_t offset2PtrVal, uint32_t offset3PtrVal);
+	typedef bool (*funcdefPacketResponse)(signed int a1, unsigned long a2, uint32_t ip, unsigned long qPort, unsigned long a5, unsigned long a6, const char *a7);
 public:
 	Events();
 	Events(const Events& orig);

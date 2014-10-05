@@ -314,7 +314,11 @@ void RabbitHole::ExecVoidFunction(char* func, std::vector<void*>* argv, std::vec
 	}
 	else if(strcmp(func, "LIMBOACCEPT") == 0)
 	{
-		
+		IPCServer::LimboAccept((char*) (*argv)[0]);
+	}
+	else if(strcmp(func, "LIMBODENY") == 0)
+	{
+		IPCServer::LimboDeny((char*) (*argv)[0], (char*) (*argv)[1]);
 	}
 }
 

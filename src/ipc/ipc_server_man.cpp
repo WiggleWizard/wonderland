@@ -22,6 +22,11 @@ IPCServer::IPCServer(char* wid) {
 	
 	// Allocate some space for limbo players
 	IPCServer::limbo.reserve(20);
+	unsigned int limboSize = 20;
+	for(unsigned int i = 0; i < limboSize; i++)
+	{
+		IPCServer::limbo.push_back(NULL);
+	}
 	
 	this->wid = wid;
 	
@@ -289,7 +294,7 @@ void IPCServer::DestroyEvent(IPCCoD4Event* event)
 	//IPCServer::bcastEventStackLock.unlock();
 }
 
-void LimboDeny(char* ip, char* reason)
+void IPCServer::LimboDeny(char* ip, char* reason)
 {
 	unsigned int s = IPCServer::limbo.size();
 	for(unsigned int i = 0; i < s; i++) 
@@ -298,12 +303,32 @@ void LimboDeny(char* ip, char* reason)
 		
 		if(strcmp(ip, limbo->ip) == 0)
 		{
+			// Set the deny reason
+			unsigned int reasonSize = strlen(reason);
+			limbo->denyReason = new char[6 + reasonSize + 1];
+			strcpy(limbo->denyReason, "error\n");
+			strcpy(limbo->denyReason + 6, reason);
+			
+			// Set state to deny
+			limbo->state = 2;
 			
 			break;
 		}
 	}
 }
-void LimboAccept(char* ip)
+void IPCServer::LimboAccept(char* ip)
 {
-	
+	unsigned int s = IPCServer::limbo.size();
+	for(unsigned int i = 0; i < s; i++) 
+	{
+		Limbo* limbo = IPCServer::limbo[i];
+		
+		if(strcmp(ip, limbo->ip) == 0)
+		{
+			// Set state to accept
+			limbo->state = 1;
+			
+			break;
+		}
+	}
 }

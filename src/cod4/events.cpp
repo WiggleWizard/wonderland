@@ -33,7 +33,7 @@ void Events::InsertHooks()
  * EVENTS
 \*===============================================================*/
 
-bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long a3, unsigned long a4, unsigned long a5)
+bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long qPort, unsigned long a4, unsigned long a5)
 {
 	// Predict slot ID
 	unsigned int  slotID       = 0;
@@ -69,13 +69,12 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long a3,
 	bool hasLimbo          = false;
 	unsigned int openLimbo = 0; // Limbo index free to overwrite
 	bool foundOpenLimbo    = false;
-	bool destroyLimbo      = false;
 	unsigned int s         = IPCServer::limbo.size();
 	for(unsigned int i = 0; i < s; i++) 
 	{
 		Limbo* limbo = IPCServer::limbo[i];
 		
-		if(limbo == NULL)
+		if(!limbo)
 		{
 			// Mark the index where we can insert a limbo if the IP does not have one
 			if(!foundOpenLimbo)
@@ -86,8 +85,6 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long a3,
 			
 			continue;
 		}
-		
-		destroyLimbo = false;
 		
 		// We get to this part only if there's a limbo present at the current index
 		if(strcmp(addr, limbo->ip) == 0)
@@ -100,7 +97,7 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long a3,
 			{
 				// Execute the origional request to join the server
 				Events::hPlayerJoinRequest->UnHook();
-				bool rtn = ((Events::funcdefPlayerJoinRequest)Events::locPlayerJoinRequest)(a1, ip, a3, a4, a5);
+				bool rtn = ((Events::funcdefPlayerJoinRequest)Events::locPlayerJoinRequest)(a1, ip, qPort, a4, a5);
 				Events::hPlayerJoinRequest->Rehook();
 				
 				// After the request is executed, we will check if the connection was a success
@@ -139,18 +136,16 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long a3,
 					printf("JOIN event fired\n");
 				}
 				
-				// Mark the limbo for destruction
-				destroyLimbo = true;
+				// Destroy limbo
+				delete limbo;
+				IPCServer::limbo[i] = NULL;
 			}
 			// Limbo is set to deny
 			else if(limbo->state == 2)
 			{
+				((funcdefPacketResponse)locfuncPacketResponseLoc)(1, a1, ip, qPort, 0x000000, 0x000000, limbo->denyReason);
 				
-			}
-			
-			// Destroy the Limbo if it's marked for destruction
-			if(destroyLimbo)
-			{
+				// Destroy limbo
 				delete limbo;
 				IPCServer::limbo[i] = NULL;
 			}
@@ -163,8 +158,7 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long a3,
 	// event.
 	if(!hasLimbo)
 	{
-		printf("IP has no Limbo, creating one\n");
-		Limbo* limbo = new Limbo;
+		Limbo* limbo = new Limbo();
 
 		// Copy IP into memory
 		char* ipAddressLimbo = new char[strlen(addr) + 1];
@@ -173,8 +167,9 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long a3,
 		limbo->ip = ipAddressLimbo;
 
 		// Insert into limbo queue
-		IPCServer::limbo[openLimbo] = limbo;
+		IPCServer::limbo.at(openLimbo) = limbo;
 
+		// Copy IP address for JOINREQ event
 		char* ipAddress = new char[strlen(addr) + 1];
 		memcpy(ipAddress, addr, strlen(addr));
 		ipAddress[strlen(addr)] = '\0';

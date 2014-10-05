@@ -9,16 +9,23 @@
 #define	LIMBO_H
 
 class Limbo {
-public:
-	unsigned int state = 0;
-	char* ip           = NULL;
-	char* denyReason   = NULL;
+public:	
+	Limbo()
+	{
+		this->state      = 0;
+		this->ip         = NULL;
+		this->denyReason = NULL;
+	}
 	
 	virtual ~Limbo()
 	{
 		delete [] this->ip;
 		delete [] this->denyReason;
 	}
+	
+	unsigned int state;
+	char* ip;
+	char* denyReason;
 };
 
 #endif	/* LIMBO_H */

@@ -98,7 +98,18 @@ public:
      */
 	static void DestroyEvent(IPCCoD4Event* event);
 	
+	/**
+	 * Sets a Limbo for denial. Non-destructive, reason is copied.
+	 * 
+     * @param ip
+     * @param reason
+     */
 	static void LimboDeny(char* ip, char* reason);
+	
+	/**
+	 * Sets a Limbo for acceptance.
+     * @param ip
+     */
 	static void LimboAccept(char* ip);
 
 /*===============================================================*\
