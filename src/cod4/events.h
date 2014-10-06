@@ -15,10 +15,10 @@ class Events {
 	
 	static const unsigned long locfuncIsPlayerConnectedAtSlot = 0x0813C0C4;
 	static const unsigned long locfuncPacketResponseLoc       = 0x0813D086;
-	static const unsigned long locfuncServerCommonInitLoc     = 0x08123080;
+	static const unsigned long locfuncServerCommonInitLoc     = 0x080B563A; // 0x08123080
 	
 	// Function definitions, in case the events need to be recalled
-	typedef int  (*funcdefServerCommonInit)(uint32_t a1);
+	typedef int  (*funcdefServerCommonInit)(int32_t a1, uint32_t a2, int32_t a3, int32_t a4);
 	typedef bool (*funcdefPlayerJoinRequest)(uint32_t a1, uint32_t ip, uint32_t a3, uint32_t a4, unsigned long a5);
 	typedef int  (*funcdefPlayerDisconnect)(unsigned long playerOffset, void* a2, unsigned int reason);
 	typedef bool (*funcdefIsPlayerConnectedAtSlot)(int a1, int a2, int a3, int a4, int a5, uint32_t offset1PtrVal, uint32_t offset2PtrVal, uint32_t offset3PtrVal);
@@ -38,7 +38,7 @@ public:
  * EVENTS
 \*===============================================================*/
 	
-	static int  HServerCommonInit(uint32_t a1);
+	static int  HServerCommonInit(int32_t a1, uint32_t a2, int32_t a3, int32_t a4);
 	static bool HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long a3, unsigned long a4, unsigned long a5);
 	static int  HPlayerDisconnect(unsigned long playerOffset, void* a2, unsigned int reason);
 	static int  HPlayerSay(unsigned int* playerId, int a2, int teamSay, char* message);

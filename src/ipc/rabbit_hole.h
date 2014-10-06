@@ -20,7 +20,9 @@ public:
 	
 	static void* ThreadedConstructor(void* self);
 	static void* ThreadedListener(void* self);
-	static void* ThreadedSender(void* self);
+	static void* ThreadedSender(void* ipcCommPtr);
+	static void* ThreadedEventSender(void* ipcCommPtr);
+	static void* ThreadedReturnFunctionSender(void* ipcCommPtr);
 	
 /*===============================================================*\
  * FUNCTIONS
@@ -30,7 +32,9 @@ public:
 	 * Signals the sender thread to send anything on the broadcast
 	 * or send stacks.
      */
-	void SignalSend();
+	void SignalEventSend();
+	
+	void SignalReturnFunctionSend();
 	
 	/**
 	 * Receives an entire chunk of data.
@@ -84,8 +88,10 @@ private:
 	pthread_t listener;
 	pthread_t sender;
 	
-	pthread_cond_t  sendSig;
-	pthread_mutex_t sendLock;
+	pthread_cond_t  sendEventSignal;
+	pthread_cond_t  sendReturnFunctionSignal;
+	pthread_mutex_t sendEventLock;
+	pthread_mutex_t sendReturnFunctionLock;
 	std::mutex returnFunctionsModLock;
 	
 	unsigned int commId;

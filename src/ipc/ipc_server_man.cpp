@@ -269,7 +269,8 @@ void IPCServer::SetEventForBroadcast(IPCCoD4Event* event)
 		// or doesn't have a client connected at all.
 		if(rabbitHole->IsActive())
 		{
-			rabbitHole->SignalSend();
+			printf("Rabbit Hole active, signalling\n");
+			rabbitHole->SignalEventSend();
 		}
 	}
 	rabbitHole = NULL;

@@ -148,9 +148,8 @@ void IPCReturnFunction::Execute()
 		this->functionReturnType = IPCTypes::ch;
 		
 		unsigned int size = allPlayerData.tellp();
-		std::string tmp = allPlayerData.str();
 		this->functionReturnPtr = new char[size];
-		memcpy(this->functionReturnPtr, tmp.c_str(), size);
+		memcpy(this->functionReturnPtr, allPlayerData.str().c_str(), size);
 	}
 }
 

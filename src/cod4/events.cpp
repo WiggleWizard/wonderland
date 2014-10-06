@@ -35,17 +35,19 @@ void Events::InsertHooks()
  * EVENTS
 \*===============================================================*/
 
-int Events::HServerCommonInit(uint32_t a1)
+int Events::HServerCommonInit(int32_t a1, uint32_t a2, int32_t a3, int32_t a4)
 {
+	Events::hServerCommonInit->UnHook();
+	int rtn = ((Events::funcdefServerCommonInit)Events::locfuncServerCommonInitLoc)(a1, a2, a3, a4);
+	Events::hServerCommonInit->Rehook();
+	
 	char* cmd = new char[4 + 1];
 	strcpy(cmd, "INIT");
 	IPCCoD4Event* ipcEvent = new IPCCoD4Event(cmd);
 	
 	IPCServer::SetEventForBroadcast(ipcEvent);
 	
-	Events::hServerCommonInit->UnHook();
-	((Events::funcdefServerCommonInit)Events::locfuncServerCommonInitLoc)(a1);
-	Events::hServerCommonInit->Rehook();
+	return rtn;
 }
 
 bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long qPort, unsigned long a4, unsigned long a5)
@@ -173,6 +175,8 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long qPo
 	// event.
 	if(!hasLimbo)
 	{
+		printf("Limbo does not exist, making one now\n");
+		
 		Limbo* limbo = new Limbo();
 
 		// Copy IP into memory
