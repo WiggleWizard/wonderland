@@ -10,6 +10,7 @@
 
 #include <arpa/inet.h>
 
+Hook* Events::hServerCommonInit;
 Hook* Events::hPlayerJoinRequest;
 Hook* Events::hPlayerDisconnect;
 Hook* Events::hPlayerSay;
@@ -22,6 +23,7 @@ Events::~Events() {}
 
 void Events::InsertHooks()
 {
+	Events::hServerCommonInit    = new Hook((void*) Events::locfuncServerCommonInitLoc, 5, (void*) Events::HServerCommonInit);
 	Events::hPlayerJoinRequest   = new Hook((void*) Events::locPlayerJoinRequest, 5, (void*) Events::HPlayerJoinRequest);
 	Events::hPlayerDisconnect    = new Hook((void*) Events::locPlayerDisconnect, 5, (void*) Events::HPlayerDisconnect);
 	Events::hPlayerSay           = new Hook((void*) Events::locPlayerSay, 5, (void*) Events::HPlayerSay);
@@ -32,6 +34,19 @@ void Events::InsertHooks()
 /*===============================================================*\
  * EVENTS
 \*===============================================================*/
+
+int Events::HServerCommonInit(uint32_t a1)
+{
+	char* cmd = new char[4 + 1];
+	strcpy(cmd, "INIT");
+	IPCCoD4Event* ipcEvent = new IPCCoD4Event(cmd);
+	
+	IPCServer::SetEventForBroadcast(ipcEvent);
+	
+	Events::hServerCommonInit->UnHook();
+	((Events::funcdefServerCommonInit)Events::locfuncServerCommonInitLoc)(a1);
+	Events::hServerCommonInit->Rehook();
+}
 
 bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long qPort, unsigned long a4, unsigned long a5)
 {

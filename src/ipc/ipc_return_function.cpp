@@ -2,10 +2,12 @@
 
 #include "../globals.h"
 #include "../cod4/callables.h"
+#include "../cod4/player.h"
 
 #include <netinet/in.h>
 #include <cstring>
-#include <stdio.h>
+#include <sstream>
+#include <string>
 
 IPCReturnFunction::IPCReturnFunction()
 {
@@ -122,6 +124,33 @@ void IPCReturnFunction::Execute()
 		memcpy(this->functionReturnPtr, &s, 4);
 		
 		this->functionReturnType = IPCTypes::uint;
+	}
+	if(strcmp(this->functionName, "PLAYERDATA") == 0)
+	{
+		std::stringstream allPlayerData;
+		uint32_t s = Callables::GetMaxClients();
+		
+		for(unsigned int i = 0; i < s; i++)
+		{
+			Player player(i);
+			
+			// Collate the user's data into a string
+			if(player.GetConnState() > 0)
+			{
+				allPlayerData << i << "\\" << player.GetIPAdr() << "\\";
+				allPlayerData << player.GetGuid() << "\\" << player.GetName();
+				
+				allPlayerData << "\n";
+			}
+		}
+		
+		// Set return type and return value
+		this->functionReturnType = IPCTypes::ch;
+		
+		unsigned int size = allPlayerData.tellp();
+		std::string tmp = allPlayerData.str();
+		this->functionReturnPtr = new char[size];
+		memcpy(this->functionReturnPtr, tmp.c_str(), size);
 	}
 }
 
