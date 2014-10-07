@@ -17,11 +17,6 @@ int                        IPCServer::serverInitialized = 0;
 IPCServer::IPCServer(char* wid) {
 	// Initialize the client holder
 	this->rabbitHoles.reserve(5);
-	unsigned int size = 5;
-	for(unsigned int i = 0; i < size; i++)
-	{
-		this->rabbitHoles.push_back(NULL);
-	}
 
 	// Allocate some memory for the broadcastEvents stack
 	IPCServer::broadcastEvents.reserve(20);
@@ -192,14 +187,11 @@ void IPCServer::ResponseHandler(int socket, char* pkt)
 	{
 		// Prepare the full path to the rabbit hole
 		unsigned int commId = this->CreateNewComm();
-		printf("asd\n");
 		
 		std::string fullCommPath = rabbitHoles.at(commId)->GetPath();
 		payload = new char[fullCommPath.length() + 1];
-		printf("asd\n");
 		
 		fullCommPath.copy(payload, fullCommPath.length(), 0);
-		printf("asd\n");
 		
 		payload[fullCommPath.length()] = '\0';
 	}
@@ -242,6 +234,13 @@ unsigned int IPCServer::CreateNewComm()
 	unsigned int s = this->rabbitHoles.size();
 	for(unsigned int i = 0; i < s; i++)
 	{
+		// Completely destroy the rabbit hole
+		if(this->rabbitHoles[i] != NULL && !this->rabbitHoles[i]->IsActive())
+		{
+			delete this->rabbitHoles[i];
+			this->rabbitHoles[i] = NULL;
+		}
+		
 		if(this->rabbitHoles[i] == NULL)
 		{
 			if(emptySlotFound == false)
@@ -250,24 +249,22 @@ unsigned int IPCServer::CreateNewComm()
 				emptySlotFound = true;
 			}
 		}
-		
-		// Completely destroy the rabbit hole
-		if(this->rabbitHoles[i] != NULL && !this->rabbitHoles[i]->IsActive())
-		{
-			delete this->rabbitHoles[i];
-			this->rabbitHoles[i] = NULL;
-		}
 	}
 	
 	unsigned int commId = 0;
 	
+	// Push on to the stack, forcing the stack to get larger
 	if(!emptySlotFound)
+	{
 		commId = this->rabbitHoles.size();
+		this->rabbitHoles.push_back(new RabbitHole(commId, this->rabbitHolePath, this->rabbitHolePrefix));
+	}
+	// Insert into an empty slot
 	else
+	{
 		commId = emptySlotIndex;
-	
-	// Create a new comm and push it into the array
-	this->rabbitHoles.push_back(new RabbitHole(commId, this->rabbitHolePath, this->rabbitHolePrefix));
+		this->rabbitHoles[commId] = new RabbitHole(commId, this->rabbitHolePath, this->rabbitHolePrefix);
+	}
 	
 	return commId;
 }
