@@ -128,13 +128,23 @@ public:
 	
 	static std::mutex bcastEventStackLock; // TODO: Refactor to name: bcastEventStackLock
 	
+/*===============================================================*\
+ * GTORS & STORS
+\*===============================================================*/
+	
+	static void Initialized();
+	
+	static int IsServerInitialized();
+	
 private:
 	pthread_t listener;
 	
 	std::string rabbitHolePrefix;
 	std::string rabbitHolePath;
+	
+	static int serverInitialized; // Changed to 1 once the server's initialized correctly
 
-	char* wid;
+	char* wid; // Wonderland ID
 };
 
 #endif	/* SERVER_H */

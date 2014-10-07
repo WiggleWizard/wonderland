@@ -29,6 +29,7 @@ public:
 	bool IsCompiled();
 	char* GetPacket();
 	unsigned int GetPacketSize();
+	char* GetName();
 	void Sent();
 	unsigned int SentTimes();
 

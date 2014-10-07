@@ -12,10 +12,16 @@ std::vector<RabbitHole*>   IPCServer::rabbitHoles;
 std::vector<IPCCoD4Event*> IPCServer::broadcastEvents;
 std::mutex                 IPCServer::bcastEventStackLock;
 std::vector<Limbo*>        IPCServer::limbo;
+int                        IPCServer::serverInitialized = 0;
 
 IPCServer::IPCServer(char* wid) {
 	// Initialize the client holder
 	this->rabbitHoles.reserve(5);
+	unsigned int size = 5;
+	for(unsigned int i = 0; i < size; i++)
+	{
+		this->rabbitHoles.push_back(NULL);
+	}
 
 	// Allocate some memory for the broadcastEvents stack
 	IPCServer::broadcastEvents.reserve(20);
@@ -186,11 +192,14 @@ void IPCServer::ResponseHandler(int socket, char* pkt)
 	{
 		// Prepare the full path to the rabbit hole
 		unsigned int commId = this->CreateNewComm();
+		printf("asd\n");
 		
 		std::string fullCommPath = rabbitHoles.at(commId)->GetPath();
 		payload = new char[fullCommPath.length() + 1];
+		printf("asd\n");
 		
 		fullCommPath.copy(payload, fullCommPath.length(), 0);
+		printf("asd\n");
 		
 		payload[fullCommPath.length()] = '\0';
 	}
@@ -225,8 +234,37 @@ void IPCServer::ResponseHandler(int socket, char* pkt)
 
 unsigned int IPCServer::CreateNewComm()
 {
-	// Prepare args for creating a new comm
-	unsigned int commId = this->rabbitHoles.size();
+	unsigned int emptySlotIndex = 0;
+	bool emptySlotFound = false;
+	
+	// Loop through all rabbit holes and find an inactive slot and to clean up
+	// any inactive slots.
+	unsigned int s = this->rabbitHoles.size();
+	for(unsigned int i = 0; i < s; i++)
+	{
+		if(this->rabbitHoles[i] == NULL)
+		{
+			if(emptySlotFound == false)
+			{
+				emptySlotIndex = i;
+				emptySlotFound = true;
+			}
+		}
+		
+		// Completely destroy the rabbit hole
+		if(this->rabbitHoles[i] != NULL && !this->rabbitHoles[i]->IsActive())
+		{
+			delete this->rabbitHoles[i];
+			this->rabbitHoles[i] = NULL;
+		}
+	}
+	
+	unsigned int commId = 0;
+	
+	if(!emptySlotFound)
+		commId = this->rabbitHoles.size();
+	else
+		commId = emptySlotIndex;
 	
 	// Create a new comm and push it into the array
 	this->rabbitHoles.push_back(new RabbitHole(commId, this->rabbitHolePath, this->rabbitHolePrefix));
@@ -238,6 +276,8 @@ void IPCServer::SetEventForBroadcast(IPCCoD4Event* event)
 {
 	// Add the event to the broadcast events vector
 	IPCServer::bcastEventStackLock.lock();
+	
+	printf("Setting event for broadcast\n");
 	
 	bool found = false;
 	unsigned int s = IPCServer::broadcastEvents.size();
@@ -267,7 +307,7 @@ void IPCServer::SetEventForBroadcast(IPCCoD4Event* event)
 		
 		// Guard against signalling a rabbit hole that has actually disconnected
 		// or doesn't have a client connected at all.
-		if(rabbitHole->IsActive())
+		if(rabbitHole != NULL && rabbitHole->IsActive())
 		{
 			printf("Rabbit Hole active, signalling\n");
 			rabbitHole->SignalEventSend();
@@ -332,4 +372,18 @@ void IPCServer::LimboAccept(char* ip)
 			break;
 		}
 	}
+}
+
+/*===============================================================*\
+ * GTORS & STORS
+\*===============================================================*/
+
+void IPCServer::Initialized()
+{
+	IPCServer::serverInitialized = 1;
+}
+
+int IPCServer::IsServerInitialized()
+{
+	IPCServer::serverInitialized;
 }

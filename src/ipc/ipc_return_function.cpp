@@ -3,6 +3,7 @@
 #include "../globals.h"
 #include "../cod4/callables.h"
 #include "../cod4/player.h"
+#include "ipc_server_man.h"
 
 #include <netinet/in.h>
 #include <cstring>
@@ -125,7 +126,16 @@ void IPCReturnFunction::Execute()
 		
 		this->functionReturnType = IPCTypes::uint;
 	}
-	if(strcmp(this->functionName, "PLAYERDATA") == 0)
+	else if(strcmp(this->functionName, "ISINIT") == 0)
+	{
+		this->functionReturnPtr = new char[4];
+		
+		uint32_t s = IPCServer::IsServerInitialized();
+		memcpy(this->functionReturnPtr, &s, 4);
+		
+		this->functionReturnType = IPCTypes::uint;
+	}
+	else if(strcmp(this->functionName, "PLAYERDATAs") == 0)
 	{
 		std::stringstream allPlayerData;
 		uint32_t s = Callables::GetMaxClients();

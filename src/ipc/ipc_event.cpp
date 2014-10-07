@@ -154,6 +154,11 @@ unsigned int IPCCoD4Event::GetPacketSize()
 	return this->packetLen;
 }
 
+char* IPCCoD4Event::GetName()
+{
+	return this->eventName;
+}
+
 void IPCCoD4Event::Sent()
 {
 	std::lock_guard<std::mutex> lock(this->sentTimeLock);

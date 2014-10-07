@@ -41,6 +41,9 @@ int Events::HServerCommonInit(int32_t a1, uint32_t a2, int32_t a3, int32_t a4)
 	int rtn = ((Events::funcdefServerCommonInit)Events::locfuncServerCommonInitLoc)(a1, a2, a3, a4);
 	Events::hServerCommonInit->Rehook();
 	
+	// Mark the initialized state of the server
+	IPCServer::Initialized();
+	
 	char* cmd = new char[4 + 1];
 	strcpy(cmd, "INIT");
 	IPCCoD4Event* ipcEvent = new IPCCoD4Event(cmd);

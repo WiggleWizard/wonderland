@@ -57,7 +57,18 @@ RabbitHole::RabbitHole(unsigned int commId, std::string path, std::string prefix
 	pthread_create(&this->constructor, NULL, RabbitHole::ThreadedConstructor, this);
 }
 
-RabbitHole::~RabbitHole() {}
+RabbitHole::~RabbitHole()
+{
+	// Loop through all events and destroy them if needed
+	unsigned int size = this->queueEvents.size();
+	for(unsigned int i = 0; i < size; i++)
+		delete this->queueEvents.at(i);
+	
+	// Loop through all return functions and destroy them if needed
+	size = this->queueReturnFunctions.size();
+	for(unsigned int i = 0; i < size; i++)
+		delete this->queueReturnFunctions.at(i);
+}
 
 /*===============================================================*\
  * THREADS
@@ -223,6 +234,7 @@ void* RabbitHole::ThreadedEventSender(void* ipcCommPtr)
 			
 			// Compile and send
 			event->Compile();
+			printf("Sending event: %s\n", event->GetName());
 			send(self->clientSocket, event->GetPacket(), event->GetPacketSize(), 0);
 
 			// Adds 1 to the sent counter
@@ -249,6 +261,7 @@ void* RabbitHole::ThreadedReturnFunctionSender(void* ipcCommPtr)
 	{
 		// The thread will only continue once the signal has been triggered
 		pthread_cond_wait(&self->sendReturnFunctionSignal, &self->sendReturnFunctionLock);
+		printf("Signalled to return function\n");
 
 		self->returnFunctionsModLock.lock();
 		
