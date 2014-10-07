@@ -131,6 +131,8 @@ void* RabbitHole::ThreadedListener(void* ipcCommPtr)
 		// Void Function
 		if(packetType == 'V')
 		{
+			std::unique_lock<std::mutex> lock(self->sendLock);
+			
 			// Get the entire payload
 			payload = self->RecvChunk(self->clientSocket, payloadLen);
 			
@@ -160,12 +162,15 @@ void* RabbitHole::ThreadedListener(void* ipcCommPtr)
 		// Return Function
 		else if(packetType == 'R')
 		{
+			std::unique_lock<std::mutex> lock(self->sendLock);
+			
 			// Get the entire payload
 			payload = self->RecvChunk(self->clientSocket, payloadLen);
 			
 			// Construct, parse and exec
 			IPCReturnFunction* returnFunction = new IPCReturnFunction();
 			returnFunction->Parse(payload, false);
+			printf("Return Function: %s\n", returnFunction->functionName);
 			returnFunction->Execute();
 			
 			// Put it into open slot, if no open slots then push ontop of the stack
@@ -191,6 +196,7 @@ void* RabbitHole::ThreadedListener(void* ipcCommPtr)
 			
 			// Signal the sending thread that we are ready to send anything on the
 			// queue
+			printf("Signal sent to Return Function Sender Thread\n");
 			self->SignalReturnFunctionSend();
 		}
 	}
@@ -213,12 +219,11 @@ void* RabbitHole::ThreadedEventSender(void* ipcCommPtr)
 	
 	while(true)
 	{
+		pthread_mutex_lock(&self->sendEventLock);
+		
 		// The thread will only continue once the signal has been triggered
 		pthread_cond_wait(&self->sendEventSignal, &self->sendEventLock);
 		printf("Signalled to send event\n");
-		
-		if(self->clientSocket == 0)
-			printf("NULL\n");
 		
 		IPCServer::bcastEventStackLock.lock();
 		
@@ -234,8 +239,9 @@ void* RabbitHole::ThreadedEventSender(void* ipcCommPtr)
 			
 			// Compile and send
 			event->Compile();
-			printf("Sending event: %s\n", event->GetName());
-			send(self->clientSocket, event->GetPacket(), event->GetPacketSize(), 0);
+			
+			if(self->clientSocket)
+				send(self->clientSocket, event->GetPacket(), event->GetPacketSize(), 0);
 
 			// Adds 1 to the sent counter
 			event->Sent();
@@ -248,6 +254,8 @@ void* RabbitHole::ThreadedEventSender(void* ipcCommPtr)
 		event = NULL;
 		
 		IPCServer::bcastEventStackLock.unlock();
+		
+		pthread_mutex_unlock(&self->sendEventLock);
 	}
 
 	return NULL;
@@ -255,12 +263,15 @@ void* RabbitHole::ThreadedEventSender(void* ipcCommPtr)
 
 void* RabbitHole::ThreadedReturnFunctionSender(void* ipcCommPtr)
 {
+	printf("Return Function Sender thread started\n");
 	RabbitHole* self = (RabbitHole*) ipcCommPtr;
 	
 	while(true)
 	{
+		std::unique_lock<std::mutex> lock(self->sendLock);
+		
 		// The thread will only continue once the signal has been triggered
-		pthread_cond_wait(&self->sendReturnFunctionSignal, &self->sendReturnFunctionLock);
+		self->sendRtnFunctionCond.wait(lock);
 		printf("Signalled to return function\n");
 
 		self->returnFunctionsModLock.lock();
@@ -299,7 +310,8 @@ void RabbitHole::SignalEventSend()
 
 void RabbitHole::SignalReturnFunctionSend()
 {
-	pthread_cond_signal(&this->sendReturnFunctionSignal);
+	this->sendRtnFunctionCond.notify_one();
+	//pthread_cond_signal(&this->sendReturnFunctionSignal);
 }
 
 char* RabbitHole::RecvChunk(int socket, u_int32_t chunkSize)

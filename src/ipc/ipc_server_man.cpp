@@ -271,13 +271,32 @@ unsigned int IPCServer::CreateNewComm()
 
 void IPCServer::SetEventForBroadcast(IPCCoD4Event* event)
 {
+	// Guards against events stacking and then releasing all at once when a rabbit
+	// hole connects during the duration of the server running.
+	bool proceed = false;
+	RabbitHole* rabbitHole = NULL;
+	unsigned int s = IPCServer::rabbitHoles.size();
+	for(unsigned int i = 0; i < s; i++)
+	{
+		rabbitHole = IPCServer::rabbitHoles[i];
+		
+		if(rabbitHole != NULL && rabbitHole->IsActive())
+		{
+			proceed = true;
+			break;
+		}
+	}
+	
+	if(!proceed)
+		return;
+	
 	// Add the event to the broadcast events vector
 	IPCServer::bcastEventStackLock.lock();
 	
 	printf("Setting event for broadcast\n");
 	
 	bool found = false;
-	unsigned int s = IPCServer::broadcastEvents.size();
+	s = IPCServer::broadcastEvents.size();
 	for(unsigned int i = 0; i < s; i++)
 	{
 		if(IPCServer::broadcastEvents[i] == NULL)
@@ -296,7 +315,6 @@ void IPCServer::SetEventForBroadcast(IPCCoD4Event* event)
 	IPCServer::bcastEventStackLock.unlock();
 
 	// Signal all comm channels that an event has triggered
-	RabbitHole* rabbitHole = NULL;
 	s = IPCServer::rabbitHoles.size();
 	for(unsigned int i = 0; i < s; i++)
 	{

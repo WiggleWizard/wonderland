@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <mutex>
+#include <condition_variable>
 
 class IPCCoD4Event;
 class IPCReturnFunction;
@@ -90,6 +91,8 @@ private:
 	
 	pthread_cond_t  sendEventSignal;
 	pthread_cond_t  sendReturnFunctionSignal;
+	std::mutex sendLock;
+	std::condition_variable sendRtnFunctionCond;
 	pthread_mutex_t sendEventLock;
 	pthread_mutex_t sendReturnFunctionLock;
 	std::mutex returnFunctionsModLock;

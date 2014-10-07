@@ -45,9 +45,9 @@ public:
 	
 	void* functionReturnPtr;
 	uint8_t functionReturnType;
+	char* functionName;
 private:
 	uint32_t packetID;
-	char* functionName;
 	std::vector<void*> argv;
 	std::vector<uint8_t> argt;
 	
