@@ -400,5 +400,5 @@ void IPCServer::Initialized()
 
 int IPCServer::IsServerInitialized()
 {
-	IPCServer::serverInitialized;
+	return IPCServer::serverInitialized;
 }

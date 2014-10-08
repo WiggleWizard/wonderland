@@ -89,12 +89,9 @@ private:
 	pthread_t listener;
 	pthread_t sender;
 	
-	pthread_cond_t  sendEventSignal;
-	pthread_cond_t  sendReturnFunctionSignal;
 	std::mutex sendLock;
+	std::condition_variable sendEventCond;
 	std::condition_variable sendRtnFunctionCond;
-	pthread_mutex_t sendEventLock;
-	pthread_mutex_t sendReturnFunctionLock;
 	std::mutex returnFunctionsModLock;
 	
 	unsigned int commId;

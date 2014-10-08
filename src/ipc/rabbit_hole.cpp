@@ -18,10 +18,6 @@ RabbitHole::RabbitHole(unsigned int commId, std::string path, std::string prefix
 	this->prefix = prefix;
 	
 	// Initialize the locks and conditions for the threads
-	this->sendEventLock = PTHREAD_MUTEX_INITIALIZER;
-	this->sendEventSignal  = PTHREAD_COND_INITIALIZER;
-	this->sendReturnFunctionLock = PTHREAD_MUTEX_INITIALIZER;
-	this->sendReturnFunctionSignal  = PTHREAD_COND_INITIALIZER;
 	
 	// Construct the socket, then in another thread await a connection
 	struct sockaddr_un local;
@@ -59,6 +55,13 @@ RabbitHole::RabbitHole(unsigned int commId, std::string path, std::string prefix
 
 RabbitHole::~RabbitHole()
 {
+	printf("Destroying rabbit hole\n");
+	
+	// Cause the threads to cease to exist
+	this->active = false;
+	this->sendRtnFunctionCond.notify_one();
+	this->sendEventCond.notify_one();
+	
 	// Loop through all events and destroy them if needed
 	unsigned int size = this->queueEvents.size();
 	for(unsigned int i = 0; i < size; i++)
@@ -68,6 +71,8 @@ RabbitHole::~RabbitHole()
 	size = this->queueReturnFunctions.size();
 	for(unsigned int i = 0; i < size; i++)
 		delete this->queueReturnFunctions.at(i);
+	
+	IPCServer::rabbitHoles.at(this->commId) = NULL;
 }
 
 /*===============================================================*\
@@ -201,9 +206,10 @@ void* RabbitHole::ThreadedListener(void* ipcCommPtr)
 		}
 	}
 	
-	printf("Rabbit hole closed by remote\n");
-	
 	self->active = false;
+	
+	// Self destruct
+	delete self;
 	
 	return NULL;
 }
@@ -219,11 +225,13 @@ void* RabbitHole::ThreadedEventSender(void* ipcCommPtr)
 	
 	while(true)
 	{
-		pthread_mutex_lock(&self->sendEventLock);
+		std::unique_lock<std::mutex> lock(self->sendLock);
 		
 		// The thread will only continue once the signal has been triggered
-		pthread_cond_wait(&self->sendEventSignal, &self->sendEventLock);
-		printf("Signalled to send event\n");
+		self->sendEventCond.wait(lock);
+		
+		if(!self->IsActive())
+			break;
 		
 		IPCServer::bcastEventStackLock.lock();
 		
@@ -254,10 +262,8 @@ void* RabbitHole::ThreadedEventSender(void* ipcCommPtr)
 		event = NULL;
 		
 		IPCServer::bcastEventStackLock.unlock();
-		
-		pthread_mutex_unlock(&self->sendEventLock);
 	}
-
+	
 	return NULL;
 }
 
@@ -272,7 +278,9 @@ void* RabbitHole::ThreadedReturnFunctionSender(void* ipcCommPtr)
 		
 		// The thread will only continue once the signal has been triggered
 		self->sendRtnFunctionCond.wait(lock);
-		printf("Signalled to return function\n");
+		
+		if(!self->IsActive())
+			break;
 
 		self->returnFunctionsModLock.lock();
 		
@@ -296,6 +304,8 @@ void* RabbitHole::ThreadedReturnFunctionSender(void* ipcCommPtr)
 		self->returnFunctionsModLock.unlock();
 	}
 	
+	printf("Return Function thread stopped\n");
+	
 	return NULL;
 }
 
@@ -305,13 +315,12 @@ void* RabbitHole::ThreadedReturnFunctionSender(void* ipcCommPtr)
 
 void RabbitHole::SignalEventSend()
 {
-	pthread_cond_signal(&this->sendEventSignal);
+	this->sendEventCond.notify_one();
 }
 
 void RabbitHole::SignalReturnFunctionSend()
 {
 	this->sendRtnFunctionCond.notify_one();
-	//pthread_cond_signal(&this->sendReturnFunctionSignal);
 }
 
 char* RabbitHole::RecvChunk(int socket, u_int32_t chunkSize)
