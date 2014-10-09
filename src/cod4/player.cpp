@@ -26,15 +26,8 @@ char* Player::GetGuid() {
     return (char*) _GetPointerToData(mClientOffsets.guid);
 }
 
-char* Player::GetIPAdr() {
-    unsigned long* net1 = (unsigned long*) _GetPointerToData(mClientOffsets.net1);
-    void* net2 = _GetDataAsPointer(mClientOffsets.net2);
-    unsigned long* net3 = (unsigned long*) _GetPointerToData(mClientOffsets.net3);
-    unsigned long* net4 = (unsigned long*) _GetPointerToData(mClientOffsets.net4);
-    void* net5 = _GetDataAsPointer(mClientOffsets.net5);
-	
-    //return utils::strxpld((char*) ((AdrToStringFuncType) smAdrToStringFunc)(*net1, net2, *net3, *net4, net5), ":", 1).at(0);
-	return NULL;
+unsigned int Player::GetIPAdr() {
+	return *(uint32_t*) _GetPointerToData(mClientOffsets.net2);
 }
 
 char* Player::GetChanBuffer() {

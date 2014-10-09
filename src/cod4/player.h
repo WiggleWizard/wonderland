@@ -43,7 +43,7 @@ class Player {
 		bool  IsInGame();
 		char* GetName();
 		char* GetGuid();
-		char* GetIPAdr();
+		unsigned int GetIPAdr();
 		char* GetChanBuffer();
 		int   GetConnState();
 

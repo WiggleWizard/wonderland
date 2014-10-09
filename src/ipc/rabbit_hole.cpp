@@ -17,7 +17,8 @@ RabbitHole::RabbitHole(unsigned int commId, std::string path, std::string prefix
 	this->path   = path;
 	this->prefix = prefix;
 	
-	// Initialize the locks and conditions for the threads
+	// Reserve some space for events and functions
+	this->queueReturnFunctions.reserve(10);
 	
 	// Construct the socket, then in another thread await a connection
 	struct sockaddr_un local;
@@ -177,6 +178,7 @@ void* RabbitHole::ThreadedListener(void* ipcCommPtr)
 			returnFunction->Parse(payload, false);
 			printf("Return Function: %s\n", returnFunction->functionName);
 			returnFunction->Execute();
+			printf("Return function executed\n");
 			
 			// Put it into open slot, if no open slots then push ontop of the stack
 			self->returnFunctionsModLock.lock();

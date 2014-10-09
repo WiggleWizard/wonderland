@@ -9,6 +9,7 @@
 #include <cstring>
 #include <sstream>
 #include <string>
+#include <arpa/inet.h>
 
 IPCReturnFunction::IPCReturnFunction()
 {
@@ -135,7 +136,7 @@ void IPCReturnFunction::Execute()
 		
 		this->functionReturnType = IPCTypes::uint;
 	}
-	else if(strcmp(this->functionName, "PLAYERDATAs") == 0)
+	else if(strcmp(this->functionName, "PLAYERDATA") == 0)
 	{
 		std::stringstream allPlayerData;
 		uint32_t s = Callables::GetMaxClients();
@@ -147,19 +148,28 @@ void IPCReturnFunction::Execute()
 			// Collate the user's data into a string
 			if(player.GetConnState() > 0)
 			{
-				allPlayerData << i << "\\" << player.GetIPAdr() << "\\";
-				allPlayerData << player.GetGuid() << "\\" << player.GetName();
+				// Convert the IP to readable
+				struct in_addr ip_addr;
+				ip_addr.s_addr = player.GetIPAdr();
+				char* addr = inet_ntoa(ip_addr);
+				
+				allPlayerData << i << "\\\\" << addr << "\\\\";
+				allPlayerData << player.GetGuid() << "\\\\" << player.GetName();
 				
 				allPlayerData << "\n";
 			}
 		}
+		
+		allPlayerData << '\0';
 		
 		// Set return type and return value
 		this->functionReturnType = IPCTypes::ch;
 		
 		unsigned int size = allPlayerData.tellp();
 		this->functionReturnPtr = new char[size];
-		memcpy(this->functionReturnPtr, allPlayerData.str().c_str(), size);
+		std::string tmp = allPlayerData.str();
+		
+		memcpy(this->functionReturnPtr, tmp.c_str(), size);
 	}
 }
 
@@ -191,7 +201,6 @@ void IPCReturnFunction::Compile()
 	
 	// Compile the actual data into the packet
 	u_int32_t cursor = 0;
-	this->packet = new char[this->packetLen];
 	
 	// - Packet type
 	this->packet[0] = 'R';
@@ -217,6 +226,10 @@ void IPCReturnFunction::Compile()
 	}
 	else if(this->functionReturnType == IPCTypes::ch)
 	{
+		s = htonl(strlen((char*) this->functionReturnPtr));
+		memcpy(this->packet + cursor, &s, 4);
+		cursor += 4;
+		
 		memcpy(this->packet + cursor, (char*) this->functionReturnPtr, strlen((char*) this->functionReturnPtr));
 	}
 }
