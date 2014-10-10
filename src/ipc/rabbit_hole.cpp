@@ -118,7 +118,7 @@ void* RabbitHole::ThreadedListener(void* ipcCommPtr)
 	{
 		char      seq[5];
 		int       rxStatus = 0;
-		u_int32_t payloadLen = 0;
+		uint32_t payloadLen = 0;
 		uint8_t   packetType;
 		char*     payload = NULL;
 		
@@ -132,7 +132,7 @@ void* RabbitHole::ThreadedListener(void* ipcCommPtr)
 		
 		// Retrieve data from the packet
 		packetType = seq[0];
-		payloadLen = ntohl(*(u_int32_t*) &seq[1]);
+		payloadLen = ntohl(*(uint32_t*) &seq[1]);
 		
 		// Void Function
 		if(packetType == 'V')
@@ -176,9 +176,7 @@ void* RabbitHole::ThreadedListener(void* ipcCommPtr)
 			// Construct, parse and exec
 			IPCReturnFunction* returnFunction = new IPCReturnFunction();
 			returnFunction->Parse(payload, false);
-			printf("Return Function: %s\n", returnFunction->functionName);
 			returnFunction->Execute();
-			printf("Return function executed\n");
 			
 			// Put it into open slot, if no open slots then push ontop of the stack
 			self->returnFunctionsModLock.lock();
@@ -203,7 +201,6 @@ void* RabbitHole::ThreadedListener(void* ipcCommPtr)
 			
 			// Signal the sending thread that we are ready to send anything on the
 			// queue
-			printf("Signal sent to Return Function Sender Thread\n");
 			self->SignalReturnFunctionSend();
 		}
 	}
@@ -271,7 +268,6 @@ void* RabbitHole::ThreadedEventSender(void* ipcCommPtr)
 
 void* RabbitHole::ThreadedReturnFunctionSender(void* ipcCommPtr)
 {
-	printf("Return Function Sender thread started\n");
 	RabbitHole* self = (RabbitHole*) ipcCommPtr;
 	
 	while(true)
@@ -305,8 +301,6 @@ void* RabbitHole::ThreadedReturnFunctionSender(void* ipcCommPtr)
 		
 		self->returnFunctionsModLock.unlock();
 	}
-	
-	printf("Return Function thread stopped\n");
 	
 	return NULL;
 }

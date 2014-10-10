@@ -59,7 +59,6 @@
   </logicalFolder>
   <sourceRootList>
     <Elem>src</Elem>
-    <Elem>src</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -147,18 +146,22 @@
       </toolsSet>
       <compileType>
         <cTool>
-          <developmentMode>5</developmentMode>
+          <architecture>1</architecture>
+          <standard>10</standard>
         </cTool>
         <ccTool>
-          <developmentMode>5</developmentMode>
+          <stripSymbols>true</stripSymbols>
+          <architecture>1</architecture>
           <standard>8</standard>
+          <commandLine>-Wall -fexceptions -fPIC -O3 -J3</commandLine>
         </ccTool>
-        <fortranCompilerTool>
-          <developmentMode>5</developmentMode>
-        </fortranCompilerTool>
         <asmTool>
-          <developmentMode>5</developmentMode>
+          <architecture>1</architecture>
         </asmTool>
+        <linkerTool>
+          <stripSymbols>true</stripSymbols>
+          <commandLine>-ldl -m32 -fPIC</commandLine>
+        </linkerTool>
       </compileType>
       <item path="src/cod4/callables.cpp" ex="false" tool="1" flavor2="0">
       </item>
