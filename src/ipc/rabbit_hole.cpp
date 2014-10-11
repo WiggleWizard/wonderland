@@ -5,6 +5,7 @@
 #include "ipc_return_function.h"
 
 #include "../cod4/callables.h"
+#include "../cod4/player.h"
 
 #include <string>
 #include <sys/un.h>
@@ -228,6 +229,7 @@ void* RabbitHole::ThreadedEventSender(void* ipcCommPtr)
 		
 		// The thread will only continue once the signal has been triggered
 		self->sendEventCond.wait(lock);
+		printf("Event thread signalled\n");
 		
 		if(!self->IsActive())
 			break;
@@ -370,6 +372,11 @@ void RabbitHole::ExecVoidFunction(char* func, std::vector<void*>* argv, std::vec
 	else if(strcmp(func, "LIMBODENY") == 0)
 	{
 		IPCServer::LimboDeny((char*) (*argv)[0], (char*) (*argv)[1]);
+	}
+	else if(strcmp(func, "KICKPLAYER") == 0)
+	{
+		Player player(*(uint32_t*) (*argv)[0]);
+		player.Kick((char*) (*argv)[1]);
 	}
 }
 
