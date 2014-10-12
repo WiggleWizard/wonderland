@@ -86,32 +86,18 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long qPo
 	
 	// Iterate over the limbos and deal with each one according to what state it's
 	// in. If there is no limbo then it will create one for that IP.
-	bool hasLimbo          = false;
-	unsigned int openLimbo = 0; // Limbo index free to overwrite
-	bool foundOpenLimbo    = false;
-	unsigned int s         = IPCServer::limbo.size();
+	bool limboResolved = false;
+	unsigned int s     = IPCServer::limbo.size();
 	for(unsigned int i = 0; i < s; i++) 
 	{
 		Limbo* limbo = IPCServer::limbo[i];
 		
 		if(!limbo)
-		{
-			// Mark the index where we can insert a limbo if the IP does not have one
-			if(!foundOpenLimbo)
-			{
-				foundOpenLimbo = true;
-				openLimbo = i;
-			}
-			
 			continue;
-		}
 		
 		// We get to this part only if there's a limbo present at the current index
-		if(strcmp(addr, limbo->ip) == 0)
+		if(strcmp(addr, limbo->ip) == 0 && limbo->qPort == qPort)
 		{
-			// Mark the IP
-			hasLimbo = true;
-			
 			// Limbo set to accept
 			if(limbo->state == 1)
 			{
@@ -159,6 +145,8 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long qPo
 				// Destroy limbo
 				delete limbo;
 				IPCServer::limbo[i] = NULL;
+				
+				limboResolved = true;
 			}
 			// Limbo is set to deny
 			else if(limbo->state == 2)
@@ -168,29 +156,16 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long qPo
 				// Destroy limbo
 				delete limbo;
 				IPCServer::limbo[i] = NULL;
+				
+				limboResolved = true;
 			}
 			
 			break;
 		}
 	}
 	
-	// No limbo match was made, so we make one here and fire the request
-	// event.
-	if(!hasLimbo)
+	if(!limboResolved)
 	{
-		printf("Limbo does not exist, making one now\n");
-		
-		Limbo* limbo = new Limbo();
-
-		// Copy IP into memory
-		char* ipAddressLimbo = new char[strlen(addr) + 1];
-		memcpy(ipAddressLimbo, addr, strlen(addr));
-		ipAddressLimbo[strlen(addr)] = '\0';
-		limbo->ip = ipAddressLimbo;
-
-		// Insert into limbo queue
-		IPCServer::limbo.at(openLimbo) = limbo;
-
 		// Copy IP address for JOINREQ event
 		char* ipAddress = new char[strlen(addr) + 1];
 		memcpy(ipAddress, addr, strlen(addr));
@@ -200,6 +175,7 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long qPo
 		strcpy(cmd, "JOINREQ");
 		IPCCoD4Event* ipcEvent = new IPCCoD4Event(cmd);
 		ipcEvent->AddArgument((void*) ipAddress, IPCTypes::ch);
+		ipcEvent->AddArgument((void*) qPort, IPCTypes::uint);
 
 		// Broadcast the event
 		IPCServer::SetEventForBroadcast(ipcEvent);

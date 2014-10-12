@@ -18,6 +18,7 @@ public:
 	
 	unsigned int state;
 	char* ip;
+	unsigned int qPort;
 	char* denyReason;
 };
 

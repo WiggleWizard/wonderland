@@ -80,13 +80,13 @@ void IPCCoD4Event::Compile()
 	this->packetLen = 1 + 4 + payloadSize;
 
 	// Prepare the packet
-	u_int32_t cursor = 0;
+	uint32_t cursor = 0;
 	this->packet = new char[this->packetLen];
 	// --- Packet type
 	this->packet[0] = 'E';
 	cursor += 1;
 	// --- Payload size
-	u_int32_t s = htonl(payloadSize);
+	uint32_t s = htonl(payloadSize);
 	memcpy(this->packet + cursor, &s, 4);
 	cursor += 4;
 	
@@ -114,7 +114,7 @@ void IPCCoD4Event::Compile()
 		// Depending on the arg type, we have to copy it differently
 		if(this->argt.at(i) == IPCTypes::uint || this->argt.at(i) == IPCTypes::sint)
 		{
-			s = htonl((u_int32_t) this->argv.at(i));
+			s = htonl((uint32_t) this->argv.at(i));
 			memcpy(this->packet + cursor, &s, 4);
 			cursor += 4;
 		}

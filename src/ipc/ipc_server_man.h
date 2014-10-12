@@ -104,13 +104,13 @@ public:
      * @param ip
      * @param reason
      */
-	static void LimboDeny(char* ip, char* reason);
+	static void LimboDeny(char* ip, uint32_t qPort, char* reason);
 	
 	/**
 	 * Sets a Limbo for acceptance.
      * @param ip
      */
-	static void LimboAccept(char* ip);
+	static void LimboAccept(char* ip, uint32_t qPort);
 
 /*===============================================================*\
  * VARIABLES

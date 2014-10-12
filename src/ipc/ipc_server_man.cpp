@@ -287,8 +287,12 @@ void IPCServer::SetEventForBroadcast(IPCCoD4Event* event)
 		}
 	}
 	
+	// Destroy the event, to prevent memory leak
 	if(!proceed)
+	{
+		delete event;
 		return;
+	}
 	
 	// Add the event to the broadcast events vector
 	IPCServer::bcastEventStackLock.lock();
@@ -350,39 +354,69 @@ void IPCServer::DestroyEvent(IPCCoD4Event* event)
 	//IPCServer::bcastEventStackLock.unlock();
 }
 
-void IPCServer::LimboDeny(char* ip, char* reason)
+void IPCServer::LimboDeny(char* ip, uint32_t qPort, char* reason)
 {
+	bool foundOpenLimbo = false;
+	
 	unsigned int s = IPCServer::limbo.size();
 	for(unsigned int i = 0; i < s; i++) 
 	{
 		Limbo* limbo = IPCServer::limbo[i];
 		
-		if(strcmp(ip, limbo->ip) == 0)
+		if(!limbo)
 		{
+			foundOpenLimbo = true;
+			
+			limbo = new Limbo();
+			
 			// Set the deny reason
 			unsigned int reasonSize = strlen(reason);
 			limbo->denyReason = new char[6 + reasonSize + 1];
 			strcpy(limbo->denyReason, "error\n");
 			strcpy(limbo->denyReason + 6, reason);
 			
-			// Set state to deny
+			// Set the IP
+			limbo->ip = new char[strlen(ip) + 1];
+			memcpy(limbo->ip, ip, strlen(ip));
+			limbo->ip[strlen(ip)] = '\0';
+			
+			// Set the qPort
+			limbo->qPort = qPort;
+			
 			limbo->state = 2;
+			
+			IPCServer::limbo.at(i) = limbo;
 			
 			break;
 		}
 	}
 }
-void IPCServer::LimboAccept(char* ip)
+void IPCServer::LimboAccept(char* ip, uint32_t qPort)
 {
+	bool foundOpenLimbo = false;
+	
 	unsigned int s = IPCServer::limbo.size();
 	for(unsigned int i = 0; i < s; i++) 
 	{
 		Limbo* limbo = IPCServer::limbo[i];
 		
-		if(strcmp(ip, limbo->ip) == 0)
+		if(!limbo)
 		{
-			// Set state to accept
+			foundOpenLimbo = true;
+			
+			limbo = new Limbo();
+			
+			// Set the IP
+			limbo->ip = new char[strlen(ip) + 1];
+			memcpy(limbo->ip, ip, strlen(ip));
+			limbo->ip[strlen(ip)] = '\0';
+			
+			// Set the qPort
+			limbo->qPort = qPort;
+			
 			limbo->state = 1;
+			
+			IPCServer::limbo.at(i) = limbo;
 			
 			break;
 		}
