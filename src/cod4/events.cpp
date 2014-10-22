@@ -103,8 +103,9 @@ bool Events::HPlayerJoinRequest(unsigned long a1, uint32_t ip, unsigned long qPo
 			{
 				// Execute the origional request to join the server
 				Events::hPlayerJoinRequest->UnHook();
-				bool rtn = ((Events::funcdefPlayerJoinRequest)Events::locPlayerJoinRequest)(a1, ip, qPort, a4, a5);
+				int rtn = ((Events::funcdefPlayerJoinRequest)Events::locPlayerJoinRequest)(a1, ip, qPort, a4, a5);
 				Events::hPlayerJoinRequest->Rehook();
+				printf("Player JOin Req RTN: %i\n", rtn);
 				
 				// After the request is executed, we will check if the connection was a success
 				// then fire another event.

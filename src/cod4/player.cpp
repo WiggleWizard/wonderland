@@ -53,8 +53,27 @@ void Player::Kick(char* reason) {
 
 void Player::SetName(char* name)
 {
-	strncpy((char*)(this->offset + 1616), "name\\", 5);
-	strncpy((char*)(this->offset + 1616 + 5), name, 15);
+	// Basically, we have an issue when forcing a name (this is mostly a hack, to make things less complicated
+	// we modify the player's userinfo packet basically simulating as if a user actually changed
+	// their name) the password the user is using is changed, if the server catches this it kicks them. So
+	// we attempting to change the player's packet buffer without fucking the buffer up.
+	
+	// We convert to std::string to make things easier on ourselves
+	std::string tmp((char*) this->offset + 1616);
+	unsigned int pos = tmp.find("\\name\\");
+	if(pos == string::npos)
+		return;
+	
+	// Strip the current name declaration from the buffer
+	tmp.erase(pos, 6 + strlen(this->GetName()));
+	
+	// Create the name structure again and push it into the buffer
+	std::string a("\\name\\");
+	std::string pName(name);
+	tmp.insert(pos, a + pName);
+	
+	strncpy((char*)(this->offset + 1616), tmp.c_str(), tmp.length());
+	*(char*)(this->offset + 1616 + tmp.length()) = 0x00; // C style string ending
 
 	((mPlayerForceUserinfo)smPlayerForceUserinfoLoc)(this->offset);
 	((mPlayerForceName)smPlayerForceNameLoc)(this->id);
