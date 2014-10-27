@@ -52,3 +52,9 @@ void Callables::TellPlayer(unsigned int playerId, char* message)
 	Player player(playerId);
 	player.SendMessage(message);	
 }
+
+void Callables::ExecCmd(char* cmd)
+{
+	printf("Attempting to execute: %s\n", cmd);
+	((Callables::funcdefExecCommand)Callables::locfuncExecCmd)(0, 0, std::string("map mp_killhouse").c_str());
+}

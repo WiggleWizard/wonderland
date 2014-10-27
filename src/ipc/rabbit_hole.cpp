@@ -378,6 +378,10 @@ void RabbitHole::ExecVoidFunction(char* func, std::vector<void*>* argv, std::vec
 		Player player(*(uint32_t*) (*argv)[0]);
 		player.Kick((char*) (*argv)[1]);
 	}
+	else if(strcmp(func, "EXECCMD") == 0)
+	{
+		Callables::ExecCmd((char*) (*argv)[0]);
+	}
 }
 
 /*===============================================================*\
