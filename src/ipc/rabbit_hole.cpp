@@ -175,6 +175,7 @@ void* RabbitHole::ThreadedListener(void* ipcCommPtr)
 			payload = self->RecvChunk(self->clientSocket, payloadLen);
 			
 			// Construct, parse and exec
+			printf("[DBG] Parsing and executing return command\n");
 			IPCReturnFunction* returnFunction = new IPCReturnFunction();
 			returnFunction->Parse(payload, false);
 			returnFunction->Execute();
@@ -278,6 +279,7 @@ void* RabbitHole::ThreadedReturnFunctionSender(void* ipcCommPtr)
 		
 		// The thread will only continue once the signal has been triggered
 		self->sendRtnFunctionCond.wait(lock);
+		printf("Return function thread signalled\n");
 		
 		if(!self->IsActive())
 			break;
@@ -380,7 +382,7 @@ void RabbitHole::ExecVoidFunction(char* func, std::vector<void*>* argv, std::vec
 	}
 	else if(strcmp(func, "EXECCMD") == 0)
 	{
-		Callables::ExecCmd((char*) (*argv)[0]);
+		Callables::EvalCmd((char*) (*argv)[0]);
 	}
 }
 

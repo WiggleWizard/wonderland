@@ -1,3 +1,7 @@
+/**
+ * Found some interesting stuff, @0816242B that runs GSC scripting
+ */
+
 #include <cstring>
 
 #include "ipc/ipc_server_man.h"

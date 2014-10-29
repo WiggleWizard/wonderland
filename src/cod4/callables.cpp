@@ -1,3 +1,5 @@
+#include <string.h>
+
 #include "callables.h"
 
 #include "player.h"
@@ -50,11 +52,12 @@ void Callables::SetPlayerName(unsigned int playerId, char* name)
 void Callables::TellPlayer(unsigned int playerId, char* message)
 {
 	Player player(playerId);
-	player.SendMessage(message);	
+	player.SendMessage(message);
 }
 
-void Callables::ExecCmd(char* cmd)
+int Callables::EvalCmd(char* cmd)
 {
-	printf("Attempting to execute: %s\n", cmd);
-	((Callables::funcdefExecCommand)Callables::locfuncExecCmd)(0, 0, std::string("map mp_killhouse").c_str());
+	int rtn = ((Callables::funcdefEvalCommand)Callables::locfuncEvalCmd)(0, cmd);
+	delete [] cmd;
+	return rtn;
 }

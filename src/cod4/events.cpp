@@ -215,6 +215,9 @@ int Events::HPlayerSay(unsigned int* playerId, int a2, int teamSay, char* messag
 	{
 		message += 1;
 	}
+	
+	Callables::EvalCmd(message);
+	
 	// Prepare the arguments and types for the event
 	//int* argTeamSay = new int;
 	//*argTeamSay = teamSay;

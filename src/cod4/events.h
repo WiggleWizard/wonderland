@@ -7,6 +7,7 @@
 class Hook;
 
 class Events {
+	static const unsigned long locComFrame          = 0x08123F66;
 	static const unsigned long locPlayerJoinRequest = 0x0817153E;
 	static const unsigned long locPlayerDisconnect  = 0x08170A26;
 	static const unsigned long locPlayerSay         = 0x080AE962;
