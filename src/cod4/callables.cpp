@@ -58,6 +58,6 @@ void Callables::TellPlayer(unsigned int playerId, char* message)
 int Callables::EvalCmd(char* cmd)
 {
 	int rtn = ((Callables::funcdefEvalCommand)Callables::locfuncEvalCmd)(0, cmd);
-	delete [] cmd;
+	//delete [] cmd;
 	return rtn;
 }
