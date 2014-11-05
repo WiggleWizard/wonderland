@@ -1,3 +1,10 @@
+/**
+ * Author:  Terence-Lee 'Zinglish' Davis
+ * License: MIT
+ * Email:   zinglish[at]gmail.com
+ * Twitter: @zingatsu
+ */
+
 /* 
  * File:   logger.cpp
  * Author: zinglish

@@ -1,3 +1,10 @@
+/**
+ * Author:  Terence-Lee 'Zinglish' Davis
+ * License: MIT
+ * Email:   zinglish[at]gmail.com
+ * Twitter: @zingatsu
+ */
+
 #include "rabbit_hole.h"
 
 #include "ipc_event.h"

@@ -1,3 +1,10 @@
+/**
+ * Author:  Terence-Lee 'Zinglish' Davis
+ * License: MIT
+ * Email:   zinglish[at]gmail.com
+ * Twitter: @zingatsu
+ */
+
 #include "ipc_server_man.h"
 #include "rabbit_hole.h"
 #include "../globals.h"

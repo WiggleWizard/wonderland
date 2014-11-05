@@ -1,3 +1,10 @@
+/**
+ * Author:  Terence-Lee 'Zinglish' Davis
+ * License: MIT
+ * Email:   zinglish[at]gmail.com
+ * Twitter: @zingatsu
+ */
+
 #include "hook.h"
 
 Hook::Hook(void* targetFunction, unsigned long copyLength, void* replacementFunction)

@@ -1,3 +1,10 @@
+/**
+ * Author:  Terence-Lee 'Zinglish' Davis
+ * License: MIT
+ * Email:   zinglish[at]gmail.com
+ * Twitter: @zingatsu
+ */
+
 // Chan sets player name: (1228 * [player id] + 0x840CCD0)
 // 0x84bd120 | Editable player
 // 0x84bd13c | F32 | Player's X

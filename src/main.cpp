@@ -1,4 +1,11 @@
 /**
+ * Author:  Terence-Lee 'Zinglish' Davis
+ * License: MIT
+ * Email:   zinglish[at]gmail.com
+ * Twitter: @zingatsu
+ */
+
+/**
  * Found some interesting stuff, @0816242B that runs GSC scripting
  */
 

@@ -1,3 +1,10 @@
+/**
+ * Author:  Terence-Lee 'Zinglish' Davis
+ * License: MIT
+ * Email:   zinglish[at]gmail.com
+ * Twitter: @zingatsu
+ */
+
 #ifndef IPC_RETURN_FUNCTION_H
 #define	IPC_RETURN_FUNCTION_H
 
