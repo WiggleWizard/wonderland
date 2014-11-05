@@ -17,13 +17,15 @@ class Events {
 	static const unsigned long locfuncIsPlayerConnectedAtSlot = 0x0813C0C4;
 	static const unsigned long locfuncPacketResponseLoc       = 0x0813D086;
 	static const unsigned long locfuncServerCommonInitLoc     = 0x080B563A; // 0x08123080
+	static const unsigned long locfuncMapRotate               = 0x0816DB92;
 	
 	// Function definitions, in case the events need to be recalled
 	typedef int  (*funcdefServerCommonInit)(int32_t a1, uint32_t a2, int32_t a3, int32_t a4);
-	typedef int (*funcdefPlayerJoinRequest)(uint32_t a1, uint32_t ip, uint32_t a3, uint32_t a4, unsigned long a5);
+	typedef int  (*funcdefPlayerJoinRequest)(uint32_t a1, uint32_t ip, uint32_t a3, uint32_t a4, unsigned long a5);
 	typedef int  (*funcdefPlayerDisconnect)(unsigned long playerOffset, void* a2, unsigned int reason);
 	typedef bool (*funcdefIsPlayerConnectedAtSlot)(int a1, int a2, int a3, int a4, int a5, uint32_t offset1PtrVal, uint32_t offset2PtrVal, uint32_t offset3PtrVal);
 	typedef bool (*funcdefPacketResponse)(signed int a1, unsigned long a2, uint32_t ip, unsigned long qPort, unsigned long a5, unsigned long a6, const char *a7);
+	typedef int  (*funcdefMapRotate)();
 public:
 	Events();
 	Events(const Events& orig);
@@ -45,6 +47,7 @@ public:
 	static int  HPlayerSay(unsigned int* playerId, int a2, int teamSay, char* message);
 	static int  HPlayerNameChange(unsigned int playerOffset);
 	static int  HServerStatusRequest();
+	static int  HMapRotate();
 	
 /*===============================================================*\
  * HOOK VARIABLES
@@ -56,6 +59,7 @@ public:
 	static Hook* hPlayerSay;
 	static Hook* hPlayerChangeName;
 	static Hook* hServerStatusRequest;
+	static Hook* hMapRotate;
 	
 private:
 	static std::vector<unsigned long> eventIds;

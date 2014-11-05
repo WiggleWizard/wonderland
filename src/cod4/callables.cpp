@@ -57,7 +57,25 @@ void Callables::TellPlayer(unsigned int playerId, char* message)
 
 int Callables::EvalCmd(char* cmd)
 {
+	printf("Evaluating command: %s\n", cmd);
 	int rtn = ((Callables::funcdefEvalCommand)Callables::locfuncEvalCmd)(0, cmd);
-	//delete [] cmd;
 	return rtn;
+}
+
+char* Callables::GetMapRotation()
+{
+	// Get the pointer to the dvar object
+	void* dvarPtr = (void*)*(unsigned long*)Callables::locMapRotation;
+	char* dvarValue = (char*)*(unsigned long*)(dvarPtr + 12);
+	
+	return (char*)(dvarValue);
+}
+
+char* Callables::GetMapRotationCurrent()
+{
+	// Get the pointer to the dvar object
+	void* dvarPtr = (void*)*(unsigned long*)Callables::locMapRotationCurrent;
+	char* dvarValue = (char*)*(unsigned long*)(dvarPtr + 12);
+	
+	return (char*)(dvarValue);
 }

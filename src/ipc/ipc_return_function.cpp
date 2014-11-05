@@ -171,6 +171,22 @@ void IPCReturnFunction::Execute()
 		
 		memcpy(this->functionReturnPtr, tmp.c_str(), size);
 	}
+	else if(strcmp(this->functionName, "GETMAPROTATION") == 0)
+	{
+		this->functionReturnPtr = new char[1024];
+		
+		strcpy((char*)this->functionReturnPtr, Callables::GetMapRotation());
+		
+		this->functionReturnType = IPCTypes::ch;
+	}
+	else if(strcmp(this->functionName, "GETMAPROTATIONCURRENT") == 0)
+	{
+		this->functionReturnPtr = new char[1024];
+		
+		strcpy((char*)this->functionReturnPtr, Callables::GetMapRotationCurrent());
+		
+		this->functionReturnType = IPCTypes::ch;
+	}
 }
 
 void IPCReturnFunction::Compile()

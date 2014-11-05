@@ -16,6 +16,7 @@ Hook* Events::hPlayerDisconnect;
 Hook* Events::hPlayerSay;
 Hook* Events::hPlayerChangeName;
 Hook* Events::hServerStatusRequest;
+Hook* Events::hMapRotate;
 
 Events::Events() {}
 Events::Events(const Events& orig) {}
@@ -29,6 +30,7 @@ void Events::InsertHooks()
 	Events::hPlayerSay           = new Hook((void*) Events::locPlayerSay, 5, (void*) Events::HPlayerSay);
 	Events::hPlayerChangeName    = new Hook((void*) Events::locPlayerNameChange, 5, (void*) Events::HPlayerNameChange);
 	Events::hServerStatusRequest = new Hook((void*) Events::locRconStatus, 5, (void*) Events::HServerStatusRequest);
+	Events::hMapRotate           = new Hook((void*) Events::locfuncMapRotate, 5, (void*) Events::HMapRotate);
 }
 
 /*===============================================================*\
@@ -279,5 +281,16 @@ int Events::HServerStatusRequest()
 	// Broadcast the event
 	IPCServer::SetEventForBroadcast(ipcEvent);
 	
+	printf("Current Map rotation: %s\n", Callables::GetMapRotation());
+	
 	return 0;
+}
+
+int Events::HMapRotate()
+{
+	Events::hMapRotate->UnHook();
+	int rtn = ((Events::funcdefMapRotate)Events::locfuncMapRotate)();
+	Events::hMapRotate->Rehook();
+	
+	return rtn;
 }
